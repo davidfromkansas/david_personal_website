@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Navbar Example</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Navbar styling */
+    .navbar {
+      display: flex;
+      justify-content: space-around;
+      background-color: #333;
+      padding: 1rem;
+    }
+
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+    }
+
+    .navbar a:hover {
+      background-color: #575757;
+      border-radius: 5px;
+    }
+
+    /* Content section styling */
+    .content {
+      padding: 2rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <div class="navbar">
+    <a onclick="showContent('home')">Home</a>
+    <a onclick="showContent('about')">About</a>
+    <a onclick="showContent('services')">Services</a>
+    <a onclick="showContent('contact')">Contact</a>
+  </div>
+
+  <!-- Content Section -->
+  <div class="content" id="content">
+    <h1>Welcome to the Home Page</h1>
+    <p>This is the default content. Click the navbar items to see more.</p>
+  </div>
+
+  <!-- JavaScript to handle content switching -->
+  <script>
+    function showContent(section) {
+      const content = document.getElementById('content');
+      let html = '';
+
+      switch (section) {
+        case 'home':
+          html = `
+            <h1>Welcome to the Home Page</h1>
+            <p>This is the default content. Click the navbar items to see more.</p>
+          `;
+          break;
+        case 'about':
+          html = `
+            <h1>About Us</h1>
+            <p>We are a company dedicated to providing quality services to our customers.</p>
+          `;
+          break;
+        case 'services':
+          html = `
+            <h1>Our Services</h1>
+            <p>We offer a range of services to meet your needs, including web design, consulting, and more.</p>
+          `;
+          break;
+        case 'contact':
+          html = `
+            <h1>Contact Us</h1>
+            <p>Get in touch with us via email at contact@example.com or call us at +123456789.</p>
+          `;
+          break;
+        default:
+          html = `
+            <h1>Welcome to the Home Page</h1>
+            <p>This is the default content. Click the navbar items to see more.</p>
+          `;
+      }
+
+      content.innerHTML = html;
+    }
+  </script>
+</body>
+</html>
