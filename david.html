@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Meet David Lie-Tjauw" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>David Lie-Tjauw</title>
+
+  <!-- Link to external CSS -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Optional Google Font (for a clean look) -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;400;700&display=swap"
+    rel="stylesheet"
+  />
+</head>
+<body>
+  <!-- Navigation -->
+  <header class="header">
+    <div class="nav-left">
+      <h1>David Lie-Tjauw</h1>
+    </div>
+    <nav class="nav-right">
+      <!-- 'About' goes to the default content -->
+      <a href="#" id="link-about" class="nav-link">About</a>
+      <a href="#" id="link-resume" class="nav-link">Resume</a>
+      <a href="#" id="link-press" class="nav-link">Press</a>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main id="main-container" class="container">
+    <!-- Default Content (what shows on first load or "About") -->
+    <p>TODO</p>
+    <p>TODO</p>
+    <p>(TODO) I grew up in Kansas and currently reside in NYC.</p>
+    <hr />
+    <ul class="links-list">
+      <li>
+        <a href="mailto:david.lietjauw@gmail.com" class="social-link">
+          Email (david.lietjauw@gmail.com)
+        </a>
+      </li>
+      <li>
+        <a href="#" class="social-link">LinkedIn (/davidfromkansas)</a>
+      </li>
+    </ul>
+  </main>
+
+  <!-- JavaScript for SPA-like navigation with history support -->
+  <script>
+    console.log("Script loaded. Make sure you're serving via HTTP, not file://");
+
+    // 1. Grab the container for main content
+    const mainContainer = document.getElementById('main-container');
+
+    // 2. Store the default content in a variable
+    const defaultContent = `
+      <p>TODO</p>
+      <p>TODO</p>
+      <p>(TODO) I grew up in Kansas and currently reside in NYC.</p>
+      <hr />
+      <ul class="links-list">
+        <li>
+          <a href="mailto:david.lietjauw@gmail.com" class="social-link">
+            Email (david.lietjauw@gmail.com)
+          </a>
+        </li>
+        <li>
+          <a href="#" class="social-link">LinkedIn (/davidfromkansas)</a>
+        </li>
+      </ul>
+    `;
+
+    // 3. Create content for each section
+    const resumeContent = `
+      <h2>Resume</h2>
+      <p>
+        Here’s where you might include a summary of your experience,
+        key achievements, or a link to a PDF version of your resume.
+      </p>
+      <p><a href="#" id="back-to-main-resume">Back to main</a></p>
+    `;
+
+    const substackContent = `
+      <h2>Substack</h2>
+      <p>
+        This is where you’d embed or summarize your Substack writings:
+        <br />“I write about technology, startups, or personal development.”
+      </p>
+      <p><a href="#" id="back-to-main-substack">Back to main</a></p>
+    `;
+
+    const pressContent = `
+      <ul>
+        <li><a href="#" class="inline-link">TechCrunch interview &#128279;
+</a></li>
+        <li><a href="#" class="inline-link">Forbes feature</a></li>
+        <li><a href="#" class="inline-link">NYTimes Q&A</a></li>
+      </ul>
+      <p><a href="#" id="back-to-main-press">Back to main</a></p>
+    `;
+
+    // 4. Map content keys to the actual HTML strings
+    const contentMap = {
+      about: defaultContent,
+      resume: resumeContent,
+      substack: substackContent,
+      press: pressContent
+    };
+
+    // 5. Function to swap content and manage the history
+    function showContent(e, stateKey) {
+      e.preventDefault();
+
+      console.log(`showContent called with stateKey = ${stateKey}`);
+
+      // Replace the main container HTML
+      mainContainer.innerHTML = contentMap[stateKey];
+
+      // Push a new history state
+      window.history.pushState({ contentKey: stateKey }, '', '#' + stateKey);
+
+      // Re-attach new link handlers
+      attachBackLinks();
+    }
+
+    // 6. Attach event listeners to the nav links (including "About")
+    function attachNavLinks() {
+      const linkAbout = document.getElementById('link-about');
+      const linkResume = document.getElementById('link-resume');
+      const linkSubstack = document.getElementById('link-substack');
+      const linkPress = document.getElementById('link-press');
+
+      if (linkAbout) {
+        linkAbout.addEventListener('click', (e) => showContent(e, 'about'));
+      }
+      if (linkResume) {
+        linkResume.addEventListener('click', (e) => showContent(e, 'resume'));
+      }
+      if (linkSubstack) {
+        linkSubstack.addEventListener('click', (e) => showContent(e, 'substack'));
+      }
+      if (linkPress) {
+        linkPress.addEventListener('click', (e) => showContent(e, 'press'));
+      }
+    }
+
+    // 7. After new content loads, "Back to main" link reverts to 'about' state
+    function attachBackLinks() {
+      const backToMainResume = document.getElementById('back-to-main-resume');
+      const backToMainSubstack = document.getElementById('back-to-main-substack');
+      const backToMainPress = document.getElementById('back-to-main-press');
+
+      if (backToMainResume) {
+        backToMainResume.addEventListener('click', (e) => showContent(e, 'about'));
+      }
+      if (backToMainSubstack) {
+        backToMainSubstack.addEventListener('click', (e) => showContent(e, 'about'));
+      }
+      if (backToMainPress) {
+        backToMainPress.addEventListener('click', (e) => showContent(e, 'about'));
+      }
+    }
+
+    // 8. Handle the browser's back/forward buttons
+    window.onpopstate = function (event) {
+      console.log("onpopstate fired:", event.state);
+      // If there's no state or no contentKey, default to 'about'
+      const contentKey = event.state?.contentKey || 'about';
+      mainContainer.innerHTML = contentMap[contentKey];
+      attachNavLinks();
+      attachBackLinks();
+    };
+
+    // 9. Initialize everything on page load
+    attachNavLinks();
+    attachBackLinks();
+
+    // 10. Set initial state if no prior history
+    if (!window.location.hash) {
+      console.log("No hash present; defaulting to #about");
+      window.history.replaceState({ contentKey: 'about' }, '', '#about');
+    } else {
+      // If the page loaded with a hash, load the corresponding content
+      const initialKey = window.location.hash.substring(1); // e.g. 'resume'
+      console.log(`Found hash: ${initialKey}`);
+
+      if (contentMap[initialKey]) {
+        console.log(`Loading content for ${initialKey}`);
+        mainContainer.innerHTML = contentMap[initialKey];
+        window.history.replaceState({ contentKey: initialKey }, '', '#' + initialKey);
+      } else {
+        // If hash doesn't match anything, default to 'about'
+        console.log(`Unrecognized hash ${initialKey}, defaulting to about`);
+        mainContainer.innerHTML = contentMap['about'];
+        window.history.replaceState({ contentKey: 'about' }, '', '#about');
+      }
+      attachNavLinks();
+      attachBackLinks();
+    }
+  </script>
+</body>
+</html>
