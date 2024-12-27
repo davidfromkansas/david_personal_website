@@ -93,3 +93,7 @@
   .social-link:hover {
     text-decoration: underline;
   }
+
+  ul {
+    padding-left: 15px;
+  }
