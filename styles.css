@@ -98,6 +98,10 @@
     padding-left: 15px;
   }
 
-  body {
+  html,body {
     background-color: #F8F8F8;
+    margin-left: 10%;
+    margin-right: 10%;
+
+
   }
