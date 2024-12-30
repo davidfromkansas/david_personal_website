@@ -96,12 +96,26 @@
 
   ul {
     padding-left: 15px;
+    
+  }
+
+  .inline-link {
+    color: #4A90E2;
+  }
+  .press {
+    list-style-type: none;
+
   }
 
   html,body {
     background-color: #F8F8F8;
-    margin-left: 10%;
-    margin-right: 10%;
-
-
+   
   }
+
+#profile_img{
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+
+}
