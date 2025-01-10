@@ -40,6 +40,10 @@
     font-size: 0.95rem;
     position: relative;
   }
+
+  .nav-link:hover{
+    text-decoration: underline;
+  }
   
   .nav-link:hover {
     color: #000;
@@ -61,8 +65,12 @@
   .inline-link {
     text-decoration: none;
     color: #007BFF;
+    
   }
   
+  p + ul {
+    margin-top: -10px;
+}
   .inline-link:hover {
     text-decoration: underline;
   }
@@ -118,4 +126,14 @@
   margin-right: auto;
   width: 100%;
 
+}
+
+.site-title{
+  text-decoration: none;
+  font-weight: bold;
+  
+}
+
+.site-title:hover {
+  text-decoration: underline; /* Show underline on hover */
 }
