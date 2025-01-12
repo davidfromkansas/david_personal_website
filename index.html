@@ -34,6 +34,8 @@
       <a href="david_lietjauw_resume.pdf" target="_blank" class="nav-link"><b>Resume</b></a>
       <!-- <a href="david_lietjauw_resume.pdf" id="link-resume" class="nav-link">Resume</a> -->
       <a href="#" id="link-press" class="nav-link"><b>Press</b></a>
+      <a href="#" id="link-work" class="nav-link"><b>Work</b></a>
+
     </nav>
   </header>
 
@@ -110,6 +112,23 @@
       </p>
     `;
 
+    const workContent = `
+      
+    <header class="header">
+    <div class="nav-left">
+      <!-- Redirect to index.html -->
+      <a href="index.html" class="site-title">David Lie-Tjauw</a>
+    </div>
+    <nav class="nav-right">
+        <a href="david_lietjauw_resume.pdf" target="_blank" class="nav-link"><b>Resume</b></a>
+      <a href="#" id="link-press" class="nav-link">Press</a>
+      <a href="#" id="link-work" class="nav-link">Work</a>
+    </nav>
+  </header>
+    <iframe src="https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7203173990331269120" height="1359" width="504" frameborder="0" allowfullscreen="" title="Embedded post"></iframe>
+    <iframe src="https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7250171919839150080" height="1611" width="504" frameborder="0" allowfullscreen="" title="Embedded post"></iframe>
+    `;
+
     const pressContent = `
 <!-- Navigation -->
   <header class="header">
@@ -118,8 +137,11 @@
       <a href="index.html" class="site-title">David Lie-Tjauw</a>
     </div>
     <nav class="nav-right">
-      <a href="#" id="link-resume" class="nav-link">Resume</a>
+            <a href="david_lietjauw_resume.pdf" target="_blank" class="nav-link"><b>Resume</b></a>
+
       <a href="#" id="link-press" class="nav-link">Press</a>
+      <a href="#" id="link-work" class="nav-link">Work</a>
+
     </nav>
   </header>
       <ul>
@@ -146,24 +168,32 @@
     const contentMap = {
       resume: resumeContent,
       press: pressContent,
+      work: workContent,
     };
 
     // Function to update content without modifying the URL
     function showContent(e, sectionKey) {
       e.preventDefault(); // Prevent default link behavior
       mainContainer.innerHTML = contentMap[sectionKey];
+       // Now re-attach event listeners in the new content
+  attachNavLinks();
     }
 
     // Attach event listeners to navigation links
     function attachNavLinks() {
       const linkResume = document.getElementById('link-resume');
       const linkPress = document.getElementById('link-press');
+      const linkWork = document.getElementById('link-work');
+
 
       if (linkResume) {
         linkResume.addEventListener('click', (e) => showContent(e, 'resume'));
       }
       if (linkPress) {
         linkPress.addEventListener('click', (e) => showContent(e, 'press'));
+      }
+      if (linkWork) {
+        linkWork.addEventListener('click', (e) => showContent(e, 'work'));
       }
     }
 
