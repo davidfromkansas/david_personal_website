@@ -1,3 +1,7 @@
+html, body{
+  background-color: f6f2ee;
+}
+
 /* Basic Reset */
 * {
     margin: 0;
