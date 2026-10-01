@@ -1,0 +1,46 @@
+name: Refresh writing
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/sync_writing.py'
+      - '.github/workflows/sync-writing.yml'
+permissions:
+  contents: write
+  pages: write
+concurrency:
+  group: sync-writing
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test importer
+        run: python -m unittest discover -s scripts -p 'test_*.py'
+      - name: Import Substack posts
+        run: python scripts/sync_writing.py
+      - name: Commit changed index
+        run: |
+          if ! git diff --quiet -- data/writing.json; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add data/writing.json
+            git commit -m 'Refresh Substack writing index'
+            git push origin HEAD:main
+          fi
+      # Bot commits do not trigger the normal branch-based Pages build.
+      # Request a build even on an unchanged index to recover from a prior build failure.
+      - name: Rebuild GitHub Pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method POST repos/${{ github.repository }}/pages/builds

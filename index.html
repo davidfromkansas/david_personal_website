@@ -11,35 +11,21 @@
   <!-- Link to external CSS -->
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- Optional Google Font (for a clean look) -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;400;700&display=swap"
-    rel="stylesheet"
-  />
+
 </head>
 <body>
-
-
-  <!-- Main Content -->
-  <main id="main-container" class="container">
-
-    <!-- Navigation -->
-  <header class="header">
-    <div class="nav-left">
-      <!-- Redirect to index.html -->
-      <a href="index.html" class="site-title">David Lie-Tjauw</a>
-    </div>
-    <nav class="nav-right">
-      <a href="david_lietjauw_resume.pdf" target="_blank" class="nav-link"><b>Resume</b></a>
-      <!-- <a href="david_lietjauw_resume.pdf" id="link-resume" class="nav-link">Resume</a> -->
-      <a href="#" id="link-press" class="nav-link"><b>Press</b></a>
-      <!-- <a href="#" id="link-work" class="nav-link"><b>Work</b></a> -->
-    </nav>
-  </header>
-
-    <!-- Default Content -->
-    <img id="profile_img" src="better.jpg"/>
+  <div id="site-shell" class="container">
+    <header class="header">
+      <a href="#home" class="site-title">David Lie-Tjauw</a>
+      <nav class="nav-right" aria-label="Main navigation">
+        <a href="david_lietjauw_resume.pdf" target="_blank" rel="noopener" class="nav-link"><b>Resume</b></a>
+        <a href="#press" class="nav-link" data-section="press"><b>Press</b></a>
+        <a href="#writing" class="nav-link" data-section="writing"><b>Writing</b></a>
+      </nav>
+    </header>
+    <main id="main-container">
+      <section id="home-view">
+    <img id="profile_img" src="better.jpg" alt="David Lie-Tjauw"/>
 
     <h1>Hi, I'm David 👋</h1>
     <p>As a Product Manager, David brings expertise in AI-driven personalization for shopping from eBay and experience in social commerce and growth from working on consumer product at Twitter. 
@@ -87,79 +73,9 @@
       <li><b>📍 Based in Brooklyn, NYC (open to relocation)</b>
       </li>
     </ul>
-  </main>
 
-  <!-- JavaScript -->
-  <script>
-    // Grab the container for the main content
-    const mainContainer = document.getElementById('main-container');
-
-    // Store the default content and other sections
-    const defaultContent = `
-      <p>David's experience spans growth, e-commerce, and personalization/recommendation systems. He has worked on large-scale consumer products at Google and Twitter, marketplaces at eBay, and space exploration at NASA.</p>
-      <p>TODO</p>
-      <p>(TODO) I grew up in Kansas and currently reside in NYC.</p>
-      <hr />
-      <ul class="links-list">
-        <li>
-          <a href="mailto:david.lietjauw@gmail.com" class="social-link">
-            Email (david.lietjauw@gmail.com)
-          </a>
-        </li>
-        <li>
-          <a href="#" class="social-link">LinkedIn (/davidfromkansas)</a>
-        </li>
-      </ul>
-    `;
-
-    const resumeContent = `
-      
-    <h2>Resume</h2>
-      <p>
-        Here’s where you might include a summary of your experience,
-        key achievements, or a link to a PDF version of your resume.
-      </p>
-    `;
-
-    const workContent = `
-      
-    <header class="header">
-    <div class="nav-left">
-      <!-- Redirect to index.html -->
-      <a href="index.html" class="site-title">David Lie-Tjauw</a>
-    </div>
-    <nav class="nav-right">
-        <a href="david_lietjauw_resume.pdf" target="_blank" class="nav-link"><b>Resume</b></a>
-      <a href="#" id="link-press" class="nav-link">Press</a>
-    </nav>
-  </header>
-
-    <main id="main-container" class="container">
-
-
-    <iframe src="https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7203173990331269120" height="1359" width="504" frameborder="0" allowfullscreen="" title="Embedded post"></iframe>
-    <iframe src="https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7250171919839150080" height="1611" width="504" frameborder="0" allowfullscreen="" title="Embedded post"></iframe>
-    <iframe src="https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7022192338139500544" height="2036" width="504" frameborder="0" allowfullscreen="" title="Embedded post"></iframe>
-    <iframe src="https://www.linkedin.com/embed/feed/update/urn:li:share:6907479828237578240" height="898" width="504" frameborder="0" allowfullscreen="" title="Embedded post"></iframe>
-    <iframe src="https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:6813256827833237504" height="1128" width="504" frameborder="0" allowfullscreen="" title="Embedded post"></iframe>
-      </main>
-    `;
-
-    const pressContent = `
-<!-- Navigation -->
-  <header class="header">
-    <div class="nav-left">
-      <!-- Redirect to index.html -->
-      <a href="index.html" class="site-title">David Lie-Tjauw</a>
-    </div>
-    <nav class="nav-right">
-            <a href="david_lietjauw_resume.pdf" target="_blank" class="nav-link"><b>Resume</b></a>
-
-      <a href="#" id="link-press" class="nav-link">Press</a>
-
-    </nav>
-  </header>
-      <ul>
+      </section>
+      <section id="press-view" hidden aria-label="Press">      <ul>
         <li class="press"><a href="https://channelx.world/2024/06/new-ebay-explore-ai-shopping-discovery-experience/" class="inline-link" target="_blank"> &#128279; Channel X: eBay's new Explore AI shopping discovery experience</a></li>
         <li class="press"><a href="https://www.valueaddedresource.net/ebay-explore-tests-downvoting-to-let-buyers-rate-ai-powered-recommendations/" class="inline-link" target="_blank"> &#128279; eBay Explore Let Buyers Rate AI-Powered Recommendations</a></li>
         <li class="press"><a href="https://techcrunch.com/2021/07/28/twitter-launches-u-s-e-commerce-pilot-that-lets-users-shop-from-profiles/" class="inline-link" target="_blank">&#128279; TechCrunch: Twitter lets users shop from profiles</a></li>
@@ -177,43 +93,26 @@
 
 
       </ul>
-    `;
 
-    // Map section keys to their respective content
-    const contentMap = {
-      resume: resumeContent,
-      press: pressContent,
-      work: workContent,
-    };
-
-    // Function to update content without modifying the URL
-    function showContent(e, sectionKey) {
-      e.preventDefault(); // Prevent default link behavior
-      mainContainer.innerHTML = contentMap[sectionKey];
-       // Now re-attach event listeners in the new content
-  attachNavLinks();
-    }
-
-    // Attach event listeners to navigation links
-    function attachNavLinks() {
-      const linkResume = document.getElementById('link-resume');
-      const linkPress = document.getElementById('link-press');
-      const linkWork = document.getElementById('link-work');
-
-
-      if (linkResume) {
-        linkResume.addEventListener('click', (e) => showContent(e, 'resume'));
-      }
-      if (linkPress) {
-        linkPress.addEventListener('click', (e) => showContent(e, 'press'));
-      }
-      if (linkWork) {
-        linkWork.addEventListener('click', (e) => showContent(e, 'work'));
-      }
-    }
-
-    // Initialize navigation
-    attachNavLinks();
-  </script>
+      </section>
+      <section id="writing-view" hidden aria-labelledby="writing-heading">
+        <h1 id="writing-heading" class="sr-only">Writing</h1>
+        <div class="writing-toolbar">
+          <span class="writing-all">All writing</span>
+          <label class="writing-search">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+            <span class="sr-only">Search writing</span>
+            <input id="writing-search" type="search" placeholder="Search" autocomplete="off">
+          </label>
+        </div>
+        <p id="writing-status" role="status">Loading writing…</p>
+        <ul id="writing-list" class="writing-list" aria-label="Articles"></ul>
+        <button id="writing-more" class="writing-more" type="button" hidden>View more ↓</button>
+        <footer class="writing-footer"><a href="https://davidfromkansas.substack.com/" target="_blank" rel="noopener">Read on Substack ↗</a><span>Reading times are estimates.</span></footer>
+        <noscript><p>Enable JavaScript to browse this list, or read all posts on Substack.</p></noscript>
+      </section>
+    </main>
+  </div>
+  <script src="writing.js" defer></script>
 </body>
 </html>

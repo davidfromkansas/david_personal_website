@@ -1,0 +1,52 @@
+{
+  "articles": [
+    {
+      "url": "https://davidfromkansas.substack.com/p/my-brief-review-on-fable-5",
+      "title": "My brief review on Fable 5",
+      "publishedAt": "2026-06-16T01:38:02+00:00",
+      "description": "Below, I one-shotted 2 video game scenes in Unity from the exact same prompt (in caption)...one is generated with Fable 5 and the other with Opus 4.8.",
+      "author": "David Lie-Tjauw",
+      "readingMinutes": 6
+    },
+    {
+      "url": "https://davidfromkansas.substack.com/p/inside-anthropics-fable-5-hackathon",
+      "title": "Building a Travel Simulator at Anthropic’s Fable 5 Hackathon",
+      "publishedAt": "2026-06-16T00:45:08+00:00",
+      "description": "Last week, I took a last minute trip to San Francisco.",
+      "author": "David Lie-Tjauw",
+      "readingMinutes": 8
+    },
+    {
+      "url": "https://davidfromkansas.substack.com/p/the-tortoise-and-the-hare",
+      "title": "The tortoise and the hare",
+      "publishedAt": "2026-05-20T15:35:45+00:00",
+      "description": "Being first is not always best! Sometimes it’s smarter to wait for technology to mature first.",
+      "author": "David Lie-Tjauw",
+      "readingMinutes": 2
+    },
+    {
+      "url": "https://davidfromkansas.substack.com/p/greatness-from-small-beginnings",
+      "title": "Greatness from small beginnings.",
+      "publishedAt": "2025-12-06T14:44:46+00:00",
+      "description": "He Played the Game for the Game's Own Sake.",
+      "author": "David Lie-Tjauw",
+      "readingMinutes": 7
+    },
+    {
+      "url": "https://davidfromkansas.substack.com/p/the-uninvited-guest",
+      "title": "The Uninvited Guest",
+      "publishedAt": "2025-01-20T19:51:14+00:00",
+      "description": "Note: I wrote this essay a while ago during the pandemic. 5 years later I dug it back up and felt very nostalgic about a bygone era everybody has now tried to forget. Enjoy!?",
+      "author": "David Lie-Tjauw",
+      "readingMinutes": 4
+    },
+    {
+      "url": "https://davidfromkansas.substack.com/p/brainstorming-new-ideas",
+      "title": "Brainstorming new ideas",
+      "publishedAt": "2020-07-13T01:08:14+00:00",
+      "description": "Originally written for the Design Collective",
+      "author": "David Lie-Tjauw",
+      "readingMinutes": 7
+    }
+  ]
+}
