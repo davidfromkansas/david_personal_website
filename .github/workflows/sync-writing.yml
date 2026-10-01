@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   sync:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
@@ -29,8 +29,13 @@ jobs:
         run: python -m unittest discover -s scripts -p 'test_*.py'
       - name: Import Substack posts
         run: |
-          curl --fail --location --silent --show-error --retry 2 --max-time 30 \
-            https://davidfromkansas.substack.com/feed --output "$RUNNER_TEMP/writing-feed.xml"
+          if ! curl --fail --location --silent --show-error --retry 2 --max-time 30 \
+            https://davidfromkansas.substack.com/feed --output "$RUNNER_TEMP/writing-feed.xml"; then
+            echo 'Direct feed unavailable; using the public RSS2JSON feed reader.'
+            curl --fail --location --silent --show-error --retry 2 --max-time 30 \
+              'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fdavidfromkansas.substack.com%2Ffeed' \
+              --output "$RUNNER_TEMP/writing-feed.xml"
+          fi
           python scripts/sync_writing.py --feed-file "$RUNNER_TEMP/writing-feed.xml"
       - name: Commit changed index
         run: |

@@ -1,6 +1,6 @@
 # Writing archive
 
-The Writing tab reads `data/writing.json`, generated from the public Substack RSS feed. No Substack credentials or browser proxy are needed.
+The Writing tab reads `data/writing.json`, generated from the public Substack RSS feed. No Substack credentials or browser proxy are needed. GitHub runners currently receive HTTP 403 from Substack, so the workflow falls back to the public RSS2JSON feed reader (https://rss2json.com/docs) if direct RSS download fails. This service needs no key for the default 10 latest posts; cached responses may add publishing delay. Older imported posts remain in the local index. If both sources fail, the existing index remains unchanged.
 
 ## Refresh
 

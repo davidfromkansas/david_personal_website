@@ -1,7 +1,7 @@
 """Import public Substack RSS metadata; keep the last good index on failure."""
 import argparse
-from datetime import timezone
-from email.utils import parsedate_to_datetime
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime, format_datetime
 from html.parser import HTMLParser
 import json
 import math
@@ -34,7 +34,25 @@ def plain(value):
     parser.feed(value or "")
     return " ".join(" ".join(parser.parts).split())
 
+def parse_mirror(payload):
+    data = json.loads(payload)
+    if data.get("status") != "ok" or data.get("feed", {}).get("url") != FEED:
+        raise ValueError("Invalid feed-reader response")
+    root = ET.Element("rss")
+    channel = ET.SubElement(root, "channel")
+    for article in data.get("items", []):
+        item = ET.SubElement(channel, "item")
+        for source, target in (("title", "title"), ("link", "link"), ("description", "description"), ("author", "{http://purl.org/dc/elements/1.1/}creator"), ("content", "{http://purl.org/rss/1.0/modules/content/}encoded")):
+            ET.SubElement(item, target).text = article.get(source) or ""
+        date = datetime.fromisoformat(article["pubDate"])
+        if date.tzinfo is None:
+            date = date.replace(tzinfo=timezone.utc)
+        ET.SubElement(item, "pubDate").text = format_datetime(date)
+    return parse_feed(ET.tostring(root))
+
 def parse_feed(xml):
+    if (xml.decode("utf-8") if isinstance(xml, bytes) else xml).lstrip().startswith("{"):
+        return parse_mirror(xml)
     root = ET.fromstring(xml)
     if root.tag != "rss" or root.find("channel") is None:
         raise ValueError("Expected an RSS channel")

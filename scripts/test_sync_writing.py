@@ -8,6 +8,13 @@ def feed(title="Example", url="https://davidfromkansas.substack.com/p/example", 
     return f'<rss><channel><item><title>{title}</title><link>{url}</link><pubDate>Tue, 16 Jun 2026 01:38:02 GMT</pubDate>{extra}</item></channel></rss>'
 
 class ImportTests(unittest.TestCase):
+    def test_mirror_matches_direct_feed(self):
+        data = {"status": "ok", "feed": {"url": "https://davidfromkansas.substack.com/feed"}, "items": [{"title": "Example", "link": "https://davidfromkansas.substack.com/p/example", "pubDate": "2026-06-16 01:38:02"}]}
+        self.assertEqual(parse_feed(json.dumps(data)), parse_feed(feed()))
+    def test_mirror_rejects_wrong_source_and_errors(self):
+        for data in ({"status": "error"}, {"status": "ok", "feed": {"url": "https://other.example/feed"}}, {"status": "ok", "feed": {"url": "https://davidfromkansas.substack.com/feed"}, "items": []}):
+            with self.assertRaises(ValueError):
+                parse_feed(json.dumps(data))
     def test_optional_metadata(self):
         article = parse_feed(feed())[0]
         self.assertEqual(article["author"], "David Lie-Tjauw")
