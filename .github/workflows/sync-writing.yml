@@ -28,7 +28,10 @@ jobs:
       - name: Test importer
         run: python -m unittest discover -s scripts -p 'test_*.py'
       - name: Import Substack posts
-        run: python scripts/sync_writing.py
+        run: |
+          curl --fail --location --silent --show-error --retry 2 --max-time 30 \
+            https://davidfromkansas.substack.com/feed --output "$RUNNER_TEMP/writing-feed.xml"
+          python scripts/sync_writing.py --feed-file "$RUNNER_TEMP/writing-feed.xml"
       - name: Commit changed index
         run: |
           if ! git diff --quiet -- data/writing.json; then
