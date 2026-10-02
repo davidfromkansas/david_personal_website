@@ -1,7 +1,7 @@
 :root {
-  --page-background: #F3E5AB;
+  --page-background: #F6D6DE;
   --text-color: #383326;
-  --border-color: #D6C58B;
+  --border-color: #D9ADB9;
 }
 
 /* Basic Reset */
@@ -160,19 +160,19 @@ iframe{
 #writing-view { margin-top: 34px; font-family: system-ui, sans-serif; font-size: 16px; line-height: 24px; background: var(--page-background); color: #26251e; }
 .writing-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 8px 16px 26px; background: var(--page-background); }
 .writing-all { color: #222; }
-.writing-search { display: flex; align-items: center; gap: 7px; width: 190px; padding: 5px 9px; border: 1px solid var(--border-color); border-radius: 6px; background: #F8EFCF; color: #686861; }
+.writing-search { display: flex; align-items: center; gap: 7px; width: 190px; padding: 5px 9px; border: 1px solid var(--border-color); border-radius: 6px; background: #FBEAF0; color: #686861; }
 .writing-search input { min-width: 0; width: 100%; border: 0; background: transparent; font: inherit; color: #222; }
 .writing-search:focus-within { outline: 2px solid #315c45; outline-offset: 2px; }
 .writing-search input:focus-visible { outline: none; }
 .writing-list { padding: 0 16px; list-style: none; }
 .writing-row { display: grid; grid-template-columns: 190px minmax(0,1fr) 200px 56px; gap: 24px; align-items: baseline; padding: 16.8px 0 14.93px; border-bottom: 1px solid var(--border-color); text-decoration: none; color: #222; }
-.writing-row:hover { background: #EBDDAB; }
+.writing-row:hover { background: #EFC4D0; }
 .writing-row:hover .writing-title { text-decoration: underline; text-underline-offset: 3px; }
 .writing-date, .writing-author, .writing-time { color: #68604B; font-size: 16px; }
 .writing-title { font-weight: 400; overflow-wrap: anywhere; }
 .writing-time { text-align: right; white-space: nowrap; }
-.writing-more { width: calc(100% - 32px); margin: 18px 16px 0; padding: 15px; border: 0; border-radius: 4px; background: #EBDDAB; color: #222; font: inherit; cursor: pointer; }
-.writing-more:hover { background: #E2D199; }
+.writing-more { width: calc(100% - 32px); margin: 18px 16px 0; padding: 15px; border: 0; border-radius: 4px; background: #EFC4D0; color: #222; font: inherit; cursor: pointer; }
+.writing-more:hover { background: #E7B3C2; }
 #writing-status { margin: 16px; color: #65655e; }
 .writing-footer { display: flex; justify-content: space-between; gap: 20px; padding: 24px 16px; color: #68604B; font-size: 13px; }
 .writing-footer a { color: inherit; text-underline-offset: 3px; }
