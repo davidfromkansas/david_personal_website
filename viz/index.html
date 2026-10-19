@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agent Trace</title>
+<meta name="description" content="Watch what Claude Code and Codex are doing and thinking, live, in your browser. Everything stays on your computer.">
+<link rel="icon" href="../david_favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one narrow reading column; a live preview of the viewer; then install steps per agent. */
+:root {
+  --bg: #fbfbfc; --surface: #ffffff; --fg: #17181c; --muted: #62656f; --faint: #9a9da6;
+  --line: #e7e8ec; --chip: #f1f2f4; --code-bg: #f4f5f7; --claude: #c2643f; --codex: #3f6fd1; --focus: #3f6fd1;
+  --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #111215; --surface: #17181c; --fg: #ecedf0; --muted: #9a9ea8; --faint: #6c707a;
+    --line: #26282e; --chip: #22242a; --code-bg: #1a1b20; --claude: #e08a66; --codex: #7aa0ec; --focus: #7aa0ec; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 720px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+a { color: inherit; text-decoration-color: var(--faint); text-underline-offset: 3px; }
+a:hover { text-decoration-color: currentColor; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+
+header { padding-block: 64px 28px; }
+.back { font-size: 14px; color: var(--muted); text-decoration: none; }
+h1 { margin: 20px 0 8px; font-size: 34px; line-height: 1.15; font-weight: 600; letter-spacing: -0.02em; text-wrap: balance; }
+.lead { margin: 0; font-size: 18px; color: var(--muted); max-width: 58ch; }
+
+.preview { margin: 8px 0 12px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.preview iframe { display: block; width: 100%; height: 520px; border: 0; }
+.caption { font-size: 13.5px; color: var(--faint); margin: 0 0 48px; }
+
+h2 { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; margin: 48px 0 12px; }
+h3 { font-size: 16px; font-weight: 600; margin: 24px 0 8px; }
+p { margin: 0 0 12px; max-width: 64ch; }
+.muted { color: var(--muted); }
+
+.tabs { display: inline-flex; background: var(--chip); border-radius: 10px; padding: 3px; margin: 4px 0 16px; }
+.tabs button { border: 0; background: transparent; font: inherit; font-size: 14px; font-weight: 500; color: var(--muted); padding: 6px 14px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: transform 160ms var(--ease-out); }
+.tabs button[aria-selected="true"] { background: var(--surface); color: var(--fg); box-shadow: 0 1px 2px rgb(0 0 0 / 0.08); }
+.tabs i { width: 7px; height: 7px; border-radius: 50%; }
+button:active { transform: scale(0.97); }
+
+ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; display: grid; gap: 20px; }
+ol.steps > li { counter-increment: step; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 0 12px; }
+ol.steps > li::before { content: counter(step); font-family: var(--mono); font-size: 13px; color: var(--faint); padding-top: 2px; }
+ol.steps p { margin: 0 0 8px; }
+
+.code { position: relative; background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px; }
+.code pre { margin: 0; padding: 14px 16px; padding-right: 76px; font-family: var(--mono); font-size: 13.5px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.copy { position: absolute; top: 8px; right: 8px; height: 28px; padding: 0 10px; font: inherit; font-size: 12.5px; font-weight: 500; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 7px; cursor: pointer; transition: transform 160ms var(--ease-out); }
+
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+th, td { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12.5px; font-weight: 500; color: var(--muted); }
+.table { overflow-x: auto; }
+code { font-family: var(--mono); font-size: 0.88em; background: var(--chip); padding: 1px 5px; border-radius: 5px; overflow-wrap: anywhere; }
+ul { padding-left: 20px; margin: 0 0 12px; }
+li { margin-bottom: 6px; }
+footer { padding-block: 56px 72px; color: var(--faint); font-size: 14px; }
+@media (max-width: 560px) {
+  header { padding-block: 40px 20px; }
+  h1 { font-size: 28px; }
+  .preview iframe { height: 460px; }
+}
+@media (prefers-reduced-motion: reduce) { button:active { transform: none; } }
+</style>
+</head>
+<body>
+<header class="wrap">
+  <a class="back" href="/">← davidfromkansas.com</a>
+  <h1>Agent Trace</h1>
+  <p class="lead">Watch what Claude Code and Codex are doing and thinking, live, in your browser. Every action and every step of reasoning they write down shows up as it happens.</p>
+</header>
+
+<main class="wrap">
+  <div class="preview">
+    <iframe src="agent-trace/viewer.html" title="Agent Trace viewer, playing a sample session" loading="lazy"></iframe>
+  </div>
+  <p class="caption">A sample session. On your computer it shows your own sessions.</p>
+
+  <h2>Install</h2>
+  <p>The easiest way is to ask your agent to install it. Pick your agent, copy the prompt, and paste it in.</p>
+
+  <div class="tabs" role="tablist" aria-label="Agent">
+    <button type="button" role="tab" id="tab-claude" aria-selected="true" aria-controls="panel-claude"><i style="background:var(--claude)"></i>Claude Code</button>
+    <button type="button" role="tab" id="tab-codex" aria-selected="false" aria-controls="panel-codex"><i style="background:var(--codex)"></i>Codex</button>
+  </div>
+
+  <section id="panel-claude" role="tabpanel" aria-labelledby="tab-claude">
+    <ol class="steps">
+      <li><div>
+        <p>Paste this into Claude Code:</p>
+        <div class="code"><pre id="p-claude">Install Agent Trace for me by running this in a terminal:
+
+curl -fsSL https://www.davidfromkansas.com/viz/install.sh | bash -s -- claude
+
+Then tell me in a sentence or two what it changed.</pre><button class="copy" type="button" data-copy="p-claude">Copy</button></div>
+      </div></li>
+      <li><div><p>Start a new Claude Code session. The viewer opens in your browser at <code>http://127.0.0.1:4877</code> and fills in as Claude works.</p></div></li>
+    </ol>
+    <h3>Or run it yourself</h3>
+    <div class="code"><pre id="c-claude">curl -fsSL https://www.davidfromkansas.com/viz/install.sh | bash -s -- claude</pre><button class="copy" type="button" data-copy="c-claude">Copy</button></div>
+  </section>
+
+  <section id="panel-codex" role="tabpanel" aria-labelledby="tab-codex" hidden>
+    <ol class="steps">
+      <li><div>
+        <p>Paste this into Codex:</p>
+        <div class="code"><pre id="p-codex">Install Agent Trace for me by running this in a terminal:
+
+curl -fsSL https://www.davidfromkansas.com/viz/install.sh | bash -s -- codex
+
+Then tell me in a sentence or two what it changed.</pre><button class="copy" type="button" data-copy="p-codex">Copy</button></div>
+      </div></li>
+      <li><div><p>Quit and reopen Codex. Codex asks you to approve new hooks before they run, so type <code>/hooks</code> and trust the Agent Trace ones.</p></div></li>
+      <li><div><p>Start a task. The viewer opens in your browser at <code>http://127.0.0.1:4877</code> and fills in as Codex works.</p></div></li>
+    </ol>
+    <h3>Or run it yourself</h3>
+    <div class="code"><pre id="c-codex">curl -fsSL https://www.davidfromkansas.com/viz/install.sh | bash -s -- codex</pre><button class="copy" type="button" data-copy="c-codex">Copy</button></div>
+  </section>
+
+  <p class="muted" style="margin-top:16px">Use both? Replace <code>claude</code> or <code>codex</code> with <code>all</code>. Needs Node.js 18 or newer, on macOS or Linux (on Windows, use WSL).</p>
+
+  <h2>What it shows</h2>
+  <div class="table">
+    <table>
+      <thead><tr><th>Agent</th><th>Actions</th><th>Thinking</th></tr></thead>
+      <tbody>
+        <tr><td>Claude Code</td><td>Every tool it uses, before and after, from its hooks</td><td>Claude's thinking text, from its session log</td></tr>
+        <tr><td>Codex</td><td>Every command and edit, before and after, from its hooks</td><td>Reasoning summaries, from its session log</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted" style="margin-top:12px">Both agents save summaries of their reasoning, not every internal step, so that is what you see. Each entry also has a “Raw data” view showing exactly what was received.</p>
+
+  <h2>Privacy</h2>
+  <ul>
+    <li>Everything stays on your computer. The viewer runs at a local address that only your computer can reach.</li>
+    <li>Common secrets, like API keys and tokens, are hidden before anything is shown or saved.</li>
+    <li>A copy of each day's entries is saved in <code>~/.agent-trace/logs</code>, so you can look back later.</li>
+    <li>The hooks never change what your agent does. They only pass a copy of each event along.</li>
+  </ul>
+
+  <h2>What gets installed</h2>
+  <ul>
+    <li>A small program in <code>~/.agent-trace</code> (four files, no other downloads).</li>
+    <li>Claude Code: hooks in <code>~/.claude/settings.json</code>, plus a skill so you can ask Claude to open the viewer.</li>
+    <li>Codex: hooks in <code>~/.codex/hooks.json</code>, and hooks turned on in <code>~/.codex/config.toml</code>.</li>
+    <li>Your existing settings are kept, and a backup of each file is saved next to it the first time.</li>
+  </ul>
+
+  <h2>Everyday commands</h2>
+  <div class="table">
+    <table>
+      <tbody>
+        <tr><td>Open the viewer</td><td><code>node ~/.agent-trace/agent-trace.js open</code></td></tr>
+        <tr><td>Check it is running</td><td><code>node ~/.agent-trace/agent-trace.js status</code></td></tr>
+        <tr><td>Stop it</td><td><code>node ~/.agent-trace/agent-trace.js stop</code></td></tr>
+        <tr><td>Remove it</td><td><code>node ~/.agent-trace/agent-trace.js uninstall</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted" style="margin-top:12px">It starts on its own when a session starts, and stops itself after two quiet hours.</p>
+
+  <h2>Source</h2>
+  <p>Four short files you can read before installing: <a href="agent-trace/server.js">server.js</a>, <a href="agent-trace/hook.js">hook.js</a>, <a href="agent-trace/agent-trace.js">agent-trace.js</a>, <a href="agent-trace/viewer.html">viewer.html</a>, and the <a href="install.sh">installer</a>.</p>
+</main>
+
+<footer class="wrap">Made by <a href="/">David Lie-Tjauw</a>. A first step toward seeing how AI agents think.</footer>
+
+<script>
+document.querySelectorAll('[role="tab"]').forEach(tab => tab.addEventListener('click', () => {
+  document.querySelectorAll('[role="tab"]').forEach(t => {
+    const on = t === tab;
+    t.setAttribute('aria-selected', String(on));
+    document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+  });
+}));
+document.querySelectorAll('.copy').forEach(btn => btn.addEventListener('click', async () => {
+  const text = document.getElementById(btn.dataset.copy).textContent;
+  try { await navigator.clipboard.writeText(text); btn.textContent = 'Copied'; }
+  catch (_) {
+    const r = document.createRange(); r.selectNodeContents(document.getElementById(btn.dataset.copy));
+    const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = 'Selected';
+  }
+  setTimeout(() => { btn.textContent = 'Copy'; }, 1600);
+}));
+</script>
+</body>
+</html>

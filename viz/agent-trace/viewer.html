@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agent Trace Viewer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one calm reading column; a sticky control bar; the feed reads top to bottom, oldest first, newest arriving at the bottom. */
+:root {
+  --bg: #fbfbfc;
+  --surface: #ffffff;
+  --fg: #17181c;
+  --muted: #6b6e78;
+  --faint: #9a9da6;
+  --line: #ebecef;
+  --hover: #f4f5f7;
+  --chip: #f1f2f4;
+  --claude: #c2643f;
+  --codex: #3f6fd1;
+  --live: #1f9d61;
+  --code-bg: #f6f7f9;
+  --code-key: #6a4fc0;
+  --code-str: #2d7a52;
+  --code-num: #b45c12;
+  --focus: #3f6fd1;
+  --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111215; --surface: #17181c; --fg: #ecedf0; --muted: #9a9ea8; --faint: #6c707a;
+    --line: #26282e; --hover: #1d1f24; --chip: #22242a; --claude: #e08a66; --codex: #7aa0ec;
+    --live: #3cc483; --code-bg: #15161a; --code-key: #b4a1f0; --code-str: #7fcfa2; --code-num: #f0a868;
+    --focus: #7aa0ec; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111215; --surface: #17181c; --fg: #ecedf0; --muted: #9a9ea8; --faint: #6c707a;
+  --line: #26282e; --hover: #1d1f24; --chip: #22242a; --claude: #e08a66; --codex: #7aa0ec;
+  --live: #3cc483; --code-bg: #15161a; --code-key: #b4a1f0; --code-str: #7fcfa2; --code-num: #f0a868;
+  --focus: #7aa0ec; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--sans); font-size: 15px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap {
+  max-width: 820px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* Header */
+header.top { padding-block: 28px 8px; }
+.title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+h1 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -0.01em; text-wrap: balance; }
+.status { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--live); flex-shrink: 0; }
+.status.paused .dot { background: var(--faint); }
+.sub { margin: 4px 0 0; color: var(--muted); font-size: 14px; max-width: 62ch; }
+
+/* Controls */
+.bar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.bar-inner { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding-block: 12px; }
+.seg { display: inline-flex; background: var(--chip); border-radius: 9px; padding: 2px; }
+.seg button {
+  border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 13px; font-weight: 500;
+  padding: 5px 10px; border-radius: 7px; cursor: pointer;
+  transition: transform 160ms var(--ease-out);
+}
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--fg); box-shadow: 0 1px 2px rgb(0 0 0 / 0.08); }
+.search {
+  flex: 1 1 160px; min-width: 0; height: 32px; padding: 0 10px; font: inherit; font-size: 13.5px;
+  color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+}
+.search::placeholder { color: var(--faint); }
+.btn {
+  height: 32px; padding: 0 12px; font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+  color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+  transition: transform 160ms var(--ease-out);
+}
+button:active { transform: scale(0.97); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.count { font-size: 12.5px; color: var(--faint); font-variant-numeric: tabular-nums; margin-left: auto; white-space: nowrap; }
+
+/* Feed */
+.feed { list-style: none; margin: 0; padding: 8px 0 120px; }
+.row {
+  display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 4px 16px;
+  padding: 14px 10px; margin: 0 -10px; border-radius: 10px;
+  border-bottom: 1px solid var(--line);
+  transition: opacity 220ms var(--ease-out), transform 220ms var(--ease-out);
+}
+@starting-style { .row.enter { opacity: 0; transform: translateY(6px); } }
+@media (hover: hover) and (pointer: fine) { .row:hover { background: var(--hover); } }
+.time { font-family: var(--mono); font-size: 12.5px; color: var(--faint); font-variant-numeric: tabular-nums; padding-top: 2px; }
+.body { min-width: 0; }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 12.5px; color: var(--muted); }
+.agent { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; color: var(--fg); }
+.agent i { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.agent.claude i { background: var(--claude); }
+.agent.codex i { background: var(--codex); }
+.tag { font-family: var(--mono); font-size: 11.5px; padding: 1px 6px; border-radius: 5px; background: var(--chip); color: var(--muted); white-space: nowrap; }
+.event { font-family: var(--mono); font-size: 11.5px; color: var(--faint); overflow-wrap: anywhere; }
+.summary { margin: 5px 0 0; font-size: 15px; overflow-wrap: anywhere; }
+.summary .verb { color: var(--muted); }
+.summary code { font-family: var(--mono); font-size: 13.5px; background: var(--chip); padding: 1px 5px; border-radius: 5px; }
+.row.thinking .summary { color: var(--muted); font-size: 14.5px; line-height: 1.6; max-width: 66ch; }
+.row.thinking .summary .verb { color: var(--fg); font-weight: 500; }
+.raw-toggle {
+  margin-top: 6px; border: 0; background: none; padding: 2px 0; font: inherit; font-size: 12.5px;
+  color: var(--faint); cursor: pointer; transition: transform 160ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) { .raw-toggle:hover { color: var(--fg); } }
+.raw {
+  margin: 8px 0 0; padding: 12px 14px; background: var(--code-bg); border: 1px solid var(--line);
+  border-radius: 8px; font-family: var(--mono); font-size: 12.5px; line-height: 1.6;
+  overflow-x: auto; white-space: pre; color: var(--fg); tab-size: 2;
+}
+.raw .k { color: var(--code-key); }
+.raw .s { color: var(--code-str); }
+.raw .n { color: var(--code-num); }
+.empty { padding: 48px 0; text-align: center; color: var(--muted); font-size: 14px; }
+
+.jump {
+  position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  border: 0; border-radius: 999px; padding: 8px 14px; font: inherit; font-size: 13px; font-weight: 500;
+  background: var(--fg); color: var(--bg); cursor: pointer; box-shadow: 0 4px 16px rgb(0 0 0 / 0.16);
+  transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out);
+}
+.jump:active { transform: translateX(-50%) scale(0.97); }
+@starting-style { .jump { opacity: 0; transform: translateX(-50%) translateY(6px); } }
+
+@media (max-width: 560px) {
+  .row { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .time { padding-top: 0; }
+  .count { margin-left: 0; width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  @starting-style { .row.enter { transform: none; } .jump { transform: translateX(-50%); } }
+  button:active, .jump:active { transform: none; }
+  .jump:active { transform: translateX(-50%); }
+}
+</style>
+</head>
+<body>
+
+<header class="top wrap">
+  <div class="title-row">
+    <h1>Agent Trace Viewer</h1>
+    <span class="status" id="status"><span class="dot"></span><span id="status-text">Live · demo data</span></span>
+  </div>
+  <p class="sub" id="sub">Every hook event and session-log line the adapters read, in the order they arrive. Open “Raw data” on any row to see exactly what was received.</p>
+</header>
+
+<div class="bar">
+  <div class="wrap bar-inner">
+    <div class="seg" role="group" aria-label="Agent">
+      <button type="button" id="ag-all" data-agent="all" aria-pressed="true">All</button>
+      <button type="button" id="ag-claude" data-agent="claude" aria-pressed="false">Claude</button>
+      <button type="button" id="ag-codex" data-agent="codex" aria-pressed="false">Codex</button>
+    </div>
+    <div class="seg" role="group" aria-label="Source">
+      <button type="button" id="src-all" data-source="all" aria-pressed="true">All</button>
+      <button type="button" id="src-hook" data-source="hook" aria-pressed="false">Hooks</button>
+      <button type="button" id="src-log" data-source="log" aria-pressed="false">Session log</button>
+    </div>
+    <input class="search" id="q" type="search" placeholder="Search" aria-label="Search entries" autocomplete="off">
+    <button class="btn" type="button" id="pause">Pause</button>
+    <span class="count" id="count">0 entries</span>
+  </div>
+</div>
+
+<main class="wrap">
+  <ol class="feed" id="feed" aria-live="polite"></ol>
+</main>
+<button class="jump" type="button" id="jump" hidden>New entries below</button>
+
+<script>
+(() => {
+  const feed = document.getElementById('feed');
+  const countEl = document.getElementById('count');
+  const jump = document.getElementById('jump');
+  const pauseBtn = document.getElementById('pause');
+  const statusEl = document.getElementById('status');
+  const statusText = document.getElementById('status-text');
+  const q = document.getElementById('q');
+
+  const MAX = 2000;
+  const entries = [];
+  const state = { agent: 'all', source: 'all', query: '', paused: false, mode: 'demo' };
+  let unseen = 0;
+  let seq = 0;
+
+  // ---------- helpers ----------
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const clip = (s, n) => { s = String(s ?? '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n - 1) + '…' : s; };
+  const fmtTime = d => d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  const plural = new Intl.PluralRules('en-US');
+  const nf = new Intl.NumberFormat('en-US');
+  const label = n => `${nf.format(n)} ${plural.select(n) === 'one' ? 'entry' : 'entries'}`;
+
+  function highlight(obj) {
+    const json = esc(JSON.stringify(obj, null, 2));
+    return json.replace(/(&quot;(?:[^&]|&(?!quot;))*?&quot;)(\s*:)?|\b(-?\d+(?:\.\d+)?)\b|\b(true|false|null)\b/g,
+      (m, str, colon, num, lit) => {
+        if (str) return colon ? `<span class="k">${str}</span>${colon}` : `<span class="s">${str}</span>`;
+        if (num) return `<span class="n">${num}</span>`;
+        return `<span class="n">${lit}</span>`;
+      });
+  }
+
+  function toolText(name, input) {
+    name = String(name || 'tool');
+    if (typeof input === 'string') { try { input = JSON.parse(input); } catch (_) { input = { input }; } }
+    input = input || {};
+    if (name === 'apply_patch') {
+      const patch = String(input.command || input.input || '');
+      const files = [...patch.matchAll(/\*\*\* (?:Update|Add|Delete) File: (.+)/g)].map(m => m[1]);
+      return { verb: 'Edit', obj: files.join(', ') || 'files', code: true };
+    }
+    if (input.command) return { verb: 'Run', obj: Array.isArray(input.command) ? input.command.join(' ') : input.command, code: true };
+    const verbs = { Read: 'Read', Edit: 'Edit', MultiEdit: 'Edit', Write: 'Write', NotebookEdit: 'Edit' };
+    if (input.file_path || input.notebook_path) return { verb: verbs[name] || name, obj: input.file_path || input.notebook_path, code: true };
+    if (input.url) return { verb: 'Open', obj: input.url, code: true };
+    if (input.pattern) return { verb: 'Search for', obj: input.pattern, code: true };
+    if (input.query) return { verb: 'Search the web for', obj: input.query, code: false };
+    if (input.description) return { verb: name === 'Task' || name === 'Agent' ? 'Hand off to a helper:' : name, obj: input.description, code: false };
+    return { verb: name, obj: clip(JSON.stringify(input), 90), code: true };
+  }
+
+  // Turn a raw record into a plain-language line. Covers both agents' hooks and session logs;
+  // anything unrecognized still shows, labeled with its type.
+  const textOf = c => typeof c === 'string' ? c : Array.isArray(c) ? c.map(x => x && (x.text || x.content && textOf(x.content) || '')).join(' ') : (c && c.text) || '';
+  const code = (s, n) => `<code>${esc(clip(s, n || 140))}</code>`;
+  const plain = (verb, s, n) => ({ html: `<span class="verb">${esc(verb)}</span> ${esc(clip(s, n || 280))}` });
+
+  function describeHook(r) {
+    const ev = r.hook_event_name || 'hook';
+    const t = r.tool_name ? toolText(r.tool_name, r.tool_input) : null;
+    switch (ev) {
+      case 'SessionStart': return { event: `${ev}${r.source ? ' · ' + r.source : ''}`, html: `<span class="verb">Session started in</span> ${code(r.cwd || '', 120)}` };
+      case 'UserPromptSubmit': return { event: ev, ...plain('Task:', r.prompt, 600) };
+      case 'PreToolUse': return { event: `${ev} · ${r.tool_name}`, html: `<span class="verb">About to ${esc(t.verb.toLowerCase())}</span> ${t.code ? code(t.obj, 180) : esc(clip(t.obj, 180))}` };
+      case 'PostToolUse': {
+        const res = r.tool_response;
+        let out = 'done';
+        if (res && typeof res === 'object') {
+          if (typeof res.exit_code === 'number') out = res.exit_code === 0 ? 'finished OK' : `failed (exit ${res.exit_code})`;
+          else if (res.interrupted) out = 'interrupted';
+          else if (res.file && res.file.numLines) out = `${nf.format(res.file.numLines)} lines`;
+          else if (res.numLines) out = `${nf.format(res.numLines)} lines`;
+          else if (res.numFiles != null) out = `${nf.format(res.numFiles)} ${res.numFiles === 1 ? 'match' : 'matches'}`;
+          else if (res.success === true) out = 'saved';
+          else if (res.stderr) out = 'done, with warnings';
+        } else if (typeof res === 'string') out = clip(res, 80) || 'done';
+        return { event: `${ev} · ${r.tool_name}`, html: `<span class="verb">${esc(t.verb)}</span> ${t.code ? code(t.obj, 120) : esc(clip(t.obj, 120))} <span class="verb">· ${esc(out)}</span>` };
+      }
+      case 'Notification': return { event: ev, ...plain('Notice:', r.message || r.title || '') };
+      case 'SubagentStop': return { event: ev, html: `<span class="verb">A helper agent finished.</span>` };
+      case 'PreCompact': return { event: `${ev}${r.trigger ? ' · ' + r.trigger : ''}`, html: `<span class="verb">Compacting the conversation to free up room.</span>` };
+      case 'Stop': return { event: ev, html: r.last_assistant_message ? `<span class="verb">Turn finished:</span> ${esc(clip(r.last_assistant_message, 280))}` : `<span class="verb">Turn finished.</span>` };
+      case 'SessionEnd': return { event: `${ev}${r.reason ? ' · ' + r.reason : ''}`, html: `<span class="verb">Session ended.</span>` };
+      default: return { event: ev, html: esc(clip(JSON.stringify(r), 160)) };
+    }
+  }
+
+  function describeClaudeLog(r) {
+    const type = r.type || 'log';
+    const content = r.message && r.message.content;
+    if (type === 'assistant' && Array.isArray(content)) {
+      const th = content.find(p => p.type === 'thinking');
+      if (th) return th.thinking
+        ? { event: 'assistant · thinking', thinking: true, html: `<span class="verb">Thinking.</span> ${esc(th.thinking)}` }
+        : { event: 'assistant · thinking', thinking: true, html: `<span class="verb">Thinking.</span> <span class="verb">(the text of this step is not saved in the log)</span>` };
+      const tu = content.find(p => p.type === 'tool_use');
+      if (tu) { const t = toolText(tu.name, tu.input); return { event: `assistant · tool_use · ${tu.name}`, html: `<span class="verb">Decides to ${esc(t.verb.toLowerCase())}</span> ${t.code ? code(t.obj, 140) : esc(clip(t.obj, 140))}` }; }
+      const tx = content.find(p => p.type === 'text');
+      if (tx) return { event: 'assistant · text', ...plain('Says:', tx.text, 600) };
+    }
+    if (type === 'user') {
+      if (typeof content === 'string') return { event: 'user · prompt', ...plain('You:', content, 600) };
+      if (Array.isArray(content)) {
+        const tr = content.find(p => p.type === 'tool_result');
+        if (tr) return { event: 'user · tool_result', ...plain(tr.is_error ? 'Tool error:' : 'Tool output:', textOf(tr.content), 220) };
+        return { event: 'user · prompt', ...plain('You:', textOf(content), 600) };
+      }
+    }
+    if (type === 'summary') return { event: 'summary', ...plain('Summary:', r.summary || '') };
+    if (type === 'system') return { event: `system${r.subtype ? ' · ' + r.subtype : ''}`, ...plain('System:', r.content || '', 200) };
+    return { event: type, html: `<span class="verb">Session data</span> ${code(Object.keys(r).slice(0, 6).join(', '), 100)}` };
+  }
+
+  function describeCodexLog(r) {
+    const p = r.payload || {};
+    const kind = `${r.type || 'log'}${p.type ? ' · ' + p.type : ''}`;
+    switch (p.type) {
+      case 'reasoning': {
+        const text = (p.summary || []).map(x => x.text).join(' ').replace(/\*\*/g, '');
+        return { event: kind, thinking: true, html: text ? `<span class="verb">Reasoning summary.</span> ${esc(text)}` : `<span class="verb">Reasoning.</span> <span class="verb">(no summary saved for this step)</span>` };
+      }
+      case 'agent_reasoning': return { event: kind, thinking: true, html: `<span class="verb">Reasoning summary.</span> ${esc(String(p.text || '').replace(/\*\*/g, ''))}` };
+      case 'function_call': {
+        let args = {}; try { args = JSON.parse(p.arguments); } catch (_) {}
+        const t = toolText(p.name, args);
+        return { event: `${kind} · ${p.name}`, html: `<span class="verb">Decides to ${esc(t.verb.toLowerCase())}</span> ${t.code ? code(t.obj, 140) : esc(clip(t.obj, 140))}` };
+      }
+      case 'custom_tool_call': return { event: `${kind} · ${p.name}`, html: `<span class="verb">Decides to use</span> ${code(p.name || 'a tool', 60)} ${esc(clip(p.input || '', 160))}` };
+      case 'function_call_output': case 'custom_tool_call_output': {
+        const out = typeof p.output === 'string' ? p.output : textOf(p.output && (p.output.content || p.output.output) || p.output);
+        return { event: kind, ...plain('Tool output:', out, 220) };
+      }
+      case 'message': {
+        const who = p.role === 'assistant' ? 'Says:' : p.role === 'user' ? 'You:' : 'Instructions:';
+        return { event: `${kind} · ${p.role}`, ...plain(who, textOf(p.content), p.role === 'assistant' ? 600 : 240) };
+      }
+      case 'user_message': return { event: kind, ...plain('You:', p.message || '', 600) };
+      case 'agent_message': return { event: kind, ...plain('Says:', p.message || '', 600) };
+      case 'token_count': {
+        const u = p.info && (p.info.total_token_usage || p.info.last_token_usage);
+        return { event: kind, html: `<span class="verb">Token usage</span>${u && u.total_tokens ? ' ' + code(nf.format(u.total_tokens) + ' total') : ''}` };
+      }
+    }
+    if (r.type === 'session_meta') return { event: kind, html: `<span class="verb">Session details</span> ${code([p.cli_version && 'Codex ' + p.cli_version, p.cwd].filter(Boolean).join(' · ') || 'recorded', 140)}` };
+    if (r.type === 'turn_context') return { event: kind, html: `<span class="verb">Turn settings</span> ${code([p.model, p.effort && 'effort ' + p.effort, p.approval_policy].filter(Boolean).join(' · ') || 'recorded', 140)}` };
+    return { event: kind, html: `<span class="verb">Session data</span> ${code(Object.keys(p).slice(0, 6).join(', ') || r.type || 'entry', 100)}` };
+  }
+
+  function describe(e) {
+    if (!e.raw || typeof e.raw !== 'object') return { event: 'text', html: esc(clip(String(e.raw), 280)) };
+    if (e.raw.text && Object.keys(e.raw).length === 1) return { event: 'text', html: esc(clip(e.raw.text, 280)) };
+    if (e.source === 'hook') return describeHook(e.raw);
+    return e.agent === 'claude' ? describeClaudeLog(e.raw) : describeCodexLog(e.raw);
+  }
+
+  // ---------- rendering ----------
+  function matches(e) {
+    if (state.agent !== 'all' && e.agent !== state.agent) return false;
+    if (state.source !== 'all' && e.source !== state.source) return false;
+    if (state.query && !e.searchText.includes(state.query)) return false;
+    return true;
+  }
+
+  function rowEl(e, animate) {
+    const li = document.createElement('li');
+    li.className = 'row' + (e.d.thinking ? ' thinking' : '') + (animate ? ' enter' : '');
+    const agentName = e.agent === 'claude' ? 'Claude Code' : 'Codex';
+    const rawId = `raw-${e.id}`;
+    li.innerHTML =
+      `<div class="time">${fmtTime(e.time)}</div>` +
+      `<div class="body">` +
+        `<div class="meta"><span class="agent ${e.agent}"><i></i>${agentName}</span>` +
+        `<span class="tag">${e.source === 'hook' ? 'hook' : 'session log'}</span>` +
+        (e.session ? `<span class="tag" title="Session ${esc(e.session)}">${esc(String(e.session).slice(0, 6))}</span>` : '') +
+        `<span class="event">${esc(e.d.event)}</span></div>` +
+        `<p class="summary">${e.d.html}</p>` +
+        `<button type="button" class="raw-toggle" aria-expanded="false" aria-controls="${rawId}">Raw data</button>` +
+        `<pre class="raw" id="${rawId}" hidden></pre>` +
+      `</div>`;
+    const btn = li.querySelector('.raw-toggle');
+    const pre = li.querySelector('.raw');
+    btn.addEventListener('click', () => {
+      const open = pre.hidden;
+      if (open && !pre.innerHTML) pre.innerHTML = highlight(e.raw);
+      pre.hidden = !open;
+      btn.setAttribute('aria-expanded', String(open));
+      btn.textContent = open ? 'Hide raw data' : 'Raw data';
+    });
+    return li;
+  }
+
+  function updateCount() {
+    const shown = entries.filter(matches).length;
+    countEl.textContent = shown === entries.length ? label(entries.length) : `${nf.format(shown)} of ${label(entries.length)}`;
+  }
+
+  function renderAll() {
+    feed.textContent = '';
+    const shown = entries.filter(matches);
+    if (!shown.length) {
+      const li = document.createElement('li');
+      li.className = 'empty';
+      li.textContent = entries.length ? 'No entries match these filters.' : 'Waiting for a session. Start a task in Claude Code or Codex and each step will appear here.';
+      feed.appendChild(li);
+    } else {
+      const frag = document.createDocumentFragment();
+      shown.forEach(e => frag.appendChild(rowEl(e, false)));
+      feed.appendChild(frag);
+    }
+    updateCount();
+  }
+
+  const nearBottom = () => window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 140;
+
+  function add(rec) {
+    const e = { id: ++seq, agent: rec.agent, source: rec.source, session: rec.session || (rec.raw && rec.raw.session_id) || null, raw: rec.raw, time: rec.time ? new Date(rec.time) : new Date() };
+    e.d = describe(e);
+    e.searchText = (e.d.event + ' ' + JSON.stringify(e.raw)).toLowerCase();
+    entries.push(e);
+    if (entries.length > MAX) { entries.shift(); renderAll(); return; }
+    if (!matches(e)) { updateCount(); return; }
+    const follow = nearBottom();
+    const empty = feed.querySelector('.empty');
+    if (empty) empty.remove();
+    feed.appendChild(rowEl(e, true));
+    updateCount();
+    if (follow) window.scrollTo({ top: document.documentElement.scrollHeight });
+    else { unseen++; jump.textContent = `${nf.format(unseen)} new ${unseen === 1 ? 'entry' : 'entries'} below`; jump.hidden = false; }
+  }
+
+  window.addEventListener('scroll', () => { if (nearBottom()) { unseen = 0; jump.hidden = true; } }, { passive: true });
+  jump.addEventListener('click', () => { window.scrollTo({ top: document.documentElement.scrollHeight }); unseen = 0; jump.hidden = true; });
+
+  document.querySelectorAll('[data-agent]').forEach(b => b.addEventListener('click', () => {
+    state.agent = b.dataset.agent;
+    document.querySelectorAll('[data-agent]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    renderAll();
+  }));
+  document.querySelectorAll('[data-source]').forEach(b => b.addEventListener('click', () => {
+    state.source = b.dataset.source;
+    document.querySelectorAll('[data-source]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    renderAll();
+  }));
+  q.addEventListener('input', () => { state.query = q.value.trim().toLowerCase(); renderAll(); });
+
+  const queue = [];
+  function setPaused(p) {
+    state.paused = p;
+    pauseBtn.textContent = p ? 'Resume' : 'Pause';
+    statusEl.classList.toggle('paused', p);
+    statusText.textContent = (p ? 'Paused' : 'Live') + (state.mode === 'demo' ? ' · demo data' : '') + (p && queue.length ? ` · ${nf.format(queue.length)} waiting` : '');
+    if (!p) while (queue.length) add(queue.shift());
+  }
+  pauseBtn.addEventListener('click', () => setPaused(!state.paused));
+  function receive(rec) { if (state.paused) { queue.push(rec); setPaused(true); } else add(rec); }
+
+  // ---------- data sources ----------
+  // On the local server this page connects to its live stream. Anywhere else it plays a realistic demo.
+  const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  if (local && 'EventSource' in window) {
+    state.mode = 'live';
+    statusText.textContent = 'Live';
+    document.getElementById('sub').textContent = 'Every hook event and session-log line the adapters read, in the order they arrive.';
+    const es = new EventSource('/events');
+    es.onmessage = m => { try { receive(JSON.parse(m.data)); } catch (_) {} };
+    es.onerror = () => { statusText.textContent = 'Reconnecting…'; };
+    es.onopen = () => setPaused(state.paused);
+    renderAll();
+    return;
+  }
+
+  const CL = { session_id: 'c8f2a1d4-7b3e-4f0a-9e61-2d5b8c7a9f10', transcript_path: '~/.claude/projects/-Users-david-code-habit-app/c8f2a1d4.jsonl', cwd: '/Users/david/code/habit-app' };
+  const CX = { session_id: '0199f3c2-6a7d-7e21-b4c8-5f1e2d9a3b77', cwd: '/Users/david/code/habit-app' };
+  const prompt = 'Add a dark mode toggle to the settings page and remember the choice.';
+  const demo = [
+    ['claude', 'hook', { ...CL, hook_event_name: 'SessionStart', source: 'startup' }],
+    ['codex', 'hook', { ...CX, hook_event_name: 'SessionStart' }],
+    ['claude', 'hook', { ...CL, hook_event_name: 'UserPromptSubmit', prompt }],
+    ['codex', 'hook', { ...CX, hook_event_name: 'UserPromptSubmit', prompt }],
+    ['claude', 'log', { type: 'assistant', uuid: 'a1f0', message: { role: 'assistant', model: 'claude-opus-5-5', content: [{ type: 'thinking', thinking: 'The user wants a dark mode toggle that persists. First I should find where the settings page lives and whether the app already has a theme system, so I extend it instead of adding a second one.' }] } }],
+    ['codex', 'log', { timestamp: '', type: 'response_item', payload: { type: 'reasoning', summary: [{ type: 'summary_text', text: '**Locating settings and theme code** I need to see how styles are applied today before adding a toggle.' }] } }],
+    ['claude', 'log', { type: 'assistant', uuid: 'a1f1', message: { role: 'assistant', content: [{ type: 'tool_use', id: 'toolu_01', name: 'Grep', input: { pattern: 'theme|colorScheme|dark', path: 'src' } }] } }],
+    ['claude', 'hook', { ...CL, hook_event_name: 'PreToolUse', tool_name: 'Grep', tool_input: { pattern: 'theme|colorScheme|dark', path: 'src' } }],
+    ['codex', 'log', { timestamp: '', type: 'response_item', payload: { type: 'function_call', name: 'shell', call_id: 'call_7Qx', arguments: JSON.stringify({ command: ['bash', '-lc', "rg -n 'theme|dark' src --glob '!**/*.test.*'"], workdir: CX.cwd }) } }],
+    ['codex', 'hook', { ...CX, hook_event_name: 'PreToolUse', tool_name: 'shell', tool_input: { command: ['bash', '-lc', "rg -n 'theme|dark' src --glob '!**/*.test.*'"] } }],
+    ['claude', 'hook', { ...CL, hook_event_name: 'PostToolUse', tool_name: 'Grep', tool_input: { pattern: 'theme|colorScheme|dark', path: 'src' }, tool_response: { mode: 'files_with_matches', filenames: ['src/styles/tokens.css', 'src/pages/Settings.tsx'], numFiles: 2 } }],
+    ['codex', 'hook', { ...CX, hook_event_name: 'PostToolUse', tool_name: 'shell', tool_input: { command: ['bash', '-lc', "rg -n 'theme|dark' src --glob '!**/*.test.*'"] }, tool_response: { exit_code: 0, stdout: 'src/styles/tokens.css:3: /* theme tokens */\nsrc/pages/Settings.tsx:41: // TODO: theme' } }],
+    ['claude', 'hook', { ...CL, hook_event_name: 'PreToolUse', tool_name: 'Read', tool_input: { file_path: '/Users/david/code/habit-app/src/pages/settings/components/preferences/AppearancePreferencesSection.tsx' } }],
+    ['claude', 'hook', { ...CL, hook_event_name: 'PostToolUse', tool_name: 'Read', tool_input: { file_path: '/Users/david/code/habit-app/src/pages/settings/components/preferences/AppearancePreferencesSection.tsx' }, tool_response: { type: 'text', numLines: 1 } }],
+    ['codex', 'log', { timestamp: '', type: 'response_item', payload: { type: 'reasoning', summary: [{ type: 'summary_text', text: '**Planning the change** Tokens already exist in tokens.css, so a data-theme attribute on the root element plus localStorage is the smallest change.' }] } }],
+    ['claude', 'log', { type: 'assistant', uuid: 'a1f2', message: { role: 'assistant', content: [{ type: 'thinking', thinking: 'tokens.css already defines colors as variables, which makes this easy: add a dark set under [data-theme="dark"], a small hook to read and save the choice, and a toggle in the appearance section. I am fairly confident; the only risk is the chart component, which might hardcode colors.' }] } }],
+    ['claude', 'hook', { ...CL, hook_event_name: 'PreToolUse', tool_name: 'Edit', tool_input: { file_path: '/Users/david/code/habit-app/src/styles/tokens.css', old_string: ':root {', new_string: ':root {\n  /* light */' } }],
+    ['codex', 'log', { timestamp: '', type: 'response_item', payload: { type: 'function_call', name: 'apply_patch', call_id: 'call_8Rk', arguments: JSON.stringify({ input: '*** Begin Patch\n*** Update File: src/styles/tokens.css\n@@\n+[data-theme="dark"] { --bg: #111; --fg: #eee; }\n*** End Patch' }) } }],
+    ['claude', 'hook', { ...CL, hook_event_name: 'PostToolUse', tool_name: 'Edit', tool_input: { file_path: '/Users/david/code/habit-app/src/styles/tokens.css' }, tool_response: { success: true } }],
+    ['claude', 'hook', { ...CL, hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'npm test -- --run src/pages/settings src/styles --reporter=dot', description: 'Run settings and style tests' } }],
+    ['codex', 'hook', { ...CX, hook_event_name: 'PreToolUse', tool_name: 'shell', tool_input: { command: ['bash', '-lc', 'npm test -- --run'] } }],
+    ['claude', 'hook', { ...CL, hook_event_name: 'PostToolUse', tool_name: 'Bash', tool_input: { command: 'npm test -- --run src/pages/settings src/styles --reporter=dot' }, tool_response: { exit_code: 1, stdout: '1 failed: Chart renders with theme colors' } }],
+    ['claude', 'log', { type: 'assistant', uuid: 'a1f3', message: { role: 'assistant', content: [{ type: 'thinking', thinking: 'As I suspected, the chart hardcodes its colors. I will switch it to read the same CSS variables, then run the tests again.' }] } }],
+    ['codex', 'hook', { ...CX, hook_event_name: 'PostToolUse', tool_name: 'shell', tool_input: { command: ['bash', '-lc', 'npm test -- --run'] }, tool_response: { exit_code: 0, stdout: '48 passed' } }],
+    ['codex', 'log', { timestamp: '', type: 'response_item', payload: { type: 'message', role: 'assistant', content: [{ type: 'output_text', text: 'Added a dark theme and a toggle in Settings. The choice is saved and restored on load. All 48 tests pass.' }] } }],
+    ['codex', 'hook', { ...CX, hook_event_name: 'Stop' }],
+    ['claude', 'hook', { ...CL, hook_event_name: 'PostToolUse', tool_name: 'Bash', tool_input: { command: 'npm test -- --run' }, tool_response: { exit_code: 0, stdout: '48 passed' } }],
+    ['claude', 'log', { type: 'assistant', uuid: 'a1f4', message: { role: 'assistant', content: [{ type: 'text', text: 'Dark mode is in: a toggle under Settings → Appearance, saved between visits. I also fixed the chart, which had hardcoded colors.' }] } }],
+    ['claude', 'hook', { ...CL, hook_event_name: 'Stop' }],
+  ];
+
+  // Start with the first part of the run already on screen, then stream the rest.
+  const preload = 9;
+  const t0 = Date.now() - preload * 1400;
+  demo.slice(0, preload).forEach((d, i) => add({ agent: d[0], source: d[1], raw: d[2], time: t0 + i * 1400 }));
+  renderAll();
+  let i = preload;
+  const tick = () => {
+    const d = demo[i % demo.length];
+    receive({ agent: d[0], source: d[1], raw: d[2] });
+    i++;
+    if (i % demo.length === 0) i = 0;
+    setTimeout(tick, i === 0 ? 6000 : 1100 + Math.random() * 900);
+  };
+  setTimeout(tick, 1200);
+})();
+</script>
+</body>
+</html>
