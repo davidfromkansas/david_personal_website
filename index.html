@@ -10,10 +10,15 @@
 
   <!-- Link to external CSS -->
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="tv.css" />
+  <link rel="preload" as="image" href="tv/tv-1400.webp" imagesrcset="tv/tv-800.webp 800w, tv/tv-1400.webp 1400w, tv/tv-2000.webp 2000w" imagesizes="100vw">
 
 
 </head>
 <body>
+  <div id="tv-track" class="tv-track">
+  <div id="tv" class="tv">
+  <div id="tv-screen" class="tv-screen">
   <div id="site-shell" class="container">
     <header class="header">
       <a href="#home" class="site-title">David Lie-Tjauw</a>
@@ -113,6 +118,13 @@
       </section>
     </main>
   </div>
+  </div>
+  <div class="tv-crt" aria-hidden="true"></div>
+  <img class="tv-frame" src="tv/tv-1400.webp" srcset="tv/tv-800.webp 800w, tv/tv-1400.webp 1400w, tv/tv-2000.webp 2000w" sizes="100vw" alt="" aria-hidden="true">
+  <div class="tv-hint" aria-hidden="true">▼ SCROLL TO WATCH</div>
+  </div>
+  </div>
   <script src="writing.js" defer></script>
+  <script src="tv.js" defer></script>
 </body>
 </html>
