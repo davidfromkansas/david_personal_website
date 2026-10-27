@@ -153,9 +153,9 @@ canvas:active { cursor: grabbing; }
       <dt>Next new</dt><dd id="nextNew">9 Nov</dd>
     </dl>
     <div class="comms reveal" style="transition-delay:1s">
-      <button class="comms-btn" id="comms" type="button" aria-pressed="false">
+      <button class="comms-btn" id="comms" type="button" aria-pressed="true">
         <span class="lvl" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-        <span id="commsLabel">Comms off</span>
+        <span id="commsLabel">Comms on</span>
       </button>
       <span class="comms-src">Apollo 11 · Tranquility Base · 21 Jul 1969</span>
     </div>
@@ -441,17 +441,25 @@ canvas:active { cursor: grabbing; }
     requestAnimationFrame(meter);
   }
   meter();
-  $('comms').addEventListener('click', () => {
-    commsOn = !commsOn;
+  function applyComms() {
     $('comms').setAttribute('aria-pressed', commsOn);
     $('commsLabel').textContent = commsOn ? 'Comms on' : 'Comms off';
     initComms();
-    actx.resume();
+    if (actx.state !== 'running') actx.resume();
     const t = actx.currentTime;
     commsGain.gain.cancelScheduledValues(t);
     commsGain.gain.setValueAtTime(commsGain.gain.value, t);
     commsGain.gain.linearRampToValueAtTime(commsOn ? 0.9 : 0, t + (commsOn ? 1.2 : 0.5));
-  });
+  }
+  $('comms').addEventListener('click', () => { commsOn = !commsOn; applyComms(); });
+  // Comms are on by default. Browsers hold sound until the visitor's first tap, click or key,
+  // so try now and again on that first interaction.
+  commsOn = true; applyComms();
+  const unlock = () => {
+    if (actx.state !== 'running') actx.resume();
+    if (actx.state === 'running') ['pointerdown', 'touchend', 'click', 'keydown'].forEach(ev => removeEventListener(ev, unlock, true));
+  };
+  ['pointerdown', 'touchend', 'click', 'keydown'].forEach(ev => addEventListener(ev, unlock, true));
   const inner = new THREE.Group();
 
   let t0 = 0, startTime = 0;
