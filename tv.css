@@ -1,0 +1,134 @@
+/* The whole site lives inside a rendered early-2000s TV/DVD combo (tv/*.webp).
+   The screen glass is transparent in the render; the site scrolls behind it. */
+:root {
+  --room: #1c1a21;
+  /* Screen opening, measured from the render's transparent glass. */
+  --scr-left: 12.45%;
+  --scr-top: 11.346%;
+  --scr-width: 75.1%;
+  --scr-height: 58.587%;
+  --tv-aspect: 2000 / 1939;
+  --scr-radius: 6.6% / 8.7%;
+  font-size: clamp(12px, 0.75vw + 9.5px, 16px);
+}
+
+html, body {
+  background: var(--room);
+  overflow-x: clip;
+}
+
+.tv {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--tv-aspect);
+}
+/* With tv.js the set is fixed and moved by scroll (see tv.js for the three phases). */
+.tv-js .tv {
+  position: fixed;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+}
+
+/* Soft light the picture tube throws onto the wall behind the set. */
+.tv::before {
+  content: "";
+  position: absolute;
+  left: -12%; right: -12%; top: -10%; bottom: 5%;
+  background: radial-gradient(closest-side, rgba(246, 214, 222, 0.10), transparent 90%);
+  z-index: -1;
+}
+
+/* "Scroll" cue under the set; fades once the visitor starts scrolling. */
+.tv-hint {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  right: 0;
+  text-align: center;
+  font: 600 clamp(11px, 1.3vw, 20px)/1 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  letter-spacing: 0.24em;
+  color: #b9a3ab;
+  transition: opacity 0.3s;
+}
+.tv-scrolled .tv-hint { opacity: 0; }
+
+.tv-screen, .tv-crt {
+  position: absolute;
+  border-radius: var(--scr-radius);
+  /* A hair of bleed under the bezel so no gap shows at any size. */
+  left: calc(var(--scr-left) - 0.3%);
+  top: calc(var(--scr-top) - 0.3%);
+  width: calc(var(--scr-width) + 0.6%);
+  height: calc(var(--scr-height) + 0.6%);
+}
+
+.tv-screen {
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  container: screen / inline-size;
+  background: var(--page-background);
+  padding: 0.3em 2%;
+}
+.tv-screen::-webkit-scrollbar { display: none; }
+.tv-js .tv-screen { overflow: hidden; }
+
+.tv-screen .container {
+  margin: 1.5rem auto 2.5rem;
+}
+
+/* Picture-tube glass: scanlines, curved-edge falloff, and a window reflection. */
+.tv-crt {
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 75% 70% at 50% 48%, transparent 62%, rgba(40, 10, 30, 0.22) 88%, rgba(10, 0, 8, 0.55) 100%),
+    repeating-linear-gradient(to bottom, rgba(60, 20, 40, 0.05) 0 1px, transparent 1px 3px);
+  box-shadow: inset 0 0 3vw rgba(0, 0, 0, 0.35);
+  mix-blend-mode: multiply;
+}
+.tv::after {
+  content: "";
+  position: absolute;
+  left: var(--scr-left);
+  top: var(--scr-top);
+  width: var(--scr-width);
+  height: var(--scr-height);
+  border-radius: var(--scr-radius);
+  pointer-events: none;
+  background: linear-gradient(162deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.08) 20%, transparent 34%);
+  mix-blend-mode: screen;
+}
+
+.tv-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Power-on: the picture opens from a bright line, like a CRT warming up. */
+@media (prefers-reduced-motion: no-preference) {
+  .tv-screen, .tv-crt { animation: crt-on 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  @keyframes crt-on {
+    0% { transform: scale(1, 0.004); filter: brightness(4); }
+    35% { transform: scale(1, 0.004); filter: brightness(4); }
+    70% { transform: scale(1, 1); filter: brightness(1.6); }
+    100% { transform: scale(1, 1); filter: brightness(1); }
+  }
+  .tv-screen { animation-name: crt-on, crt-flicker; animation-duration: 0.9s, 6s; animation-iteration-count: 1, infinite; animation-delay: 0s, 1s; }
+  @keyframes crt-flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.985; }
+  }
+}
+
+/* Tiny screens (phones): tighten the writing list so rows still read well. */
+@container screen (max-width: 420px) {
+  #writing-view { font-size: 13px; line-height: 19px; margin-top: 18px; }
+  .writing-date, .writing-author, .writing-time { font-size: 12px; }
+  .writing-title { font-size: 14px; }
+  .writing-search { width: 130px; }
+}
