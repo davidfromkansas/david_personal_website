@@ -119,14 +119,41 @@ button { font: inherit; }
     max(28px, env(safe-area-inset-top)) max(var(--pad), env(safe-area-inset-right))
     max(48px, env(safe-area-inset-bottom)) max(var(--pad), env(safe-area-inset-left));
 }
+/* The page's h1. The profile card shows the name, so this one is for screen readers only. */
 .name {
-  margin: 0 0 10px;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
+
+/* ---- Profile card, top right, the same on every section (a Switch-style squircle) ---- */
+.gamercard {
+  position: absolute;
+  z-index: 2;
+  top: max(24px, env(safe-area-inset-top));
+  right: max(var(--pad), env(safe-area-inset-right));
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 7px 20px 7px 7px;
+  border-radius: 22px;
+  background: #f4f4f4;
+  color: #2d2d2d;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  font-family: Nunito, Inter, system-ui, sans-serif;
+  white-space: nowrap;
+}
+.gc-ring { display: block; padding: 3px; border-radius: 17px; background: #e60012; }
+.gc-avatar { display: block; width: 50px; height: 50px; border-radius: 14px; border: 3px solid #fff; object-fit: cover; }
+.gc-text { display: flex; flex-direction: column; }
+.gc-name { font-size: 17px; font-weight: 800; }
+.gc-date { font-size: 14px; font-weight: 600; color: #5a5a5a; }
+.gc-rule { width: 1.5px; height: 30px; background: #d0d0d0; }
+.gc-time { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.gc-time small { font-size: 13px; font-weight: 600; color: #5a5a5a; }
 
 /* ---- Tiles ---- */
 .tiles-wrap { position: relative; margin: 0 calc(-1 * var(--pad)); }
@@ -375,6 +402,10 @@ a.card:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px)
 @media (min-width: 701px) {
   .tiles { overflow: visible; }
 }
+/* Mid widths: the tile row and the profile card would collide, so drop the tiles below the card. */
+@media (min-width: 701px) and (max-width: 960px) {
+  .hero-inner { padding-top: max(100px, env(safe-area-inset-top)); }
+}
 @media (max-width: 700px) {
   :root { --tile: 66px; --gap: 4px; --small: 0.74; }
   .hero-inner { padding-bottom: max(36px, env(safe-area-inset-bottom)); }
@@ -385,6 +416,15 @@ a.card:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px)
     background:
       linear-gradient(180deg, rgba(var(--shade), 0.7) 0%, rgba(var(--shade), 0) 30%, rgba(var(--shade), 0) 45%, rgba(var(--shade), 0.85) 78%, var(--bg) 100%);
   }
+  .gamercard { top: max(14px, env(safe-area-inset-top)); gap: 10px; padding: 5px 14px 5px 5px; border-radius: 17px; }
+  .gc-ring { padding: 2px; border-radius: 13px; }
+  .gc-avatar { width: 36px; height: 36px; border-radius: 11px; border-width: 2px; }
+  .gc-name { font-size: 14px; }
+  .gc-date { font-size: 12px; }
+  .gc-rule { height: 24px; }
+  .gc-time { font-size: 18px; }
+  .gc-time small { font-size: 11px; }
+  .hero-inner { padding-top: max(76px, env(safe-area-inset-top)); }
   .about { grid-template-columns: 1fr; }
   .portrait { max-width: 260px; }
   .essay a { grid-template-columns: 1fr; }

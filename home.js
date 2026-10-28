@@ -41,27 +41,97 @@
     if (name) select(name);
   });
 
-  // Roving focus: Tab lands on one tile, arrows move between them, Enter or Space selects.
+  // Roving focus: Tab lands on the selected tile; Enter or Space selects the focused one.
   const setRoving = (tile) => tiles.forEach(t => (t.tabIndex = t === tile ? 0 : -1));
-  tiles.forEach((tile, i) => {
+  tiles.forEach((tile) => {
     tile.addEventListener('focus', () => setRoving(tile));
     tile.addEventListener('keydown', (e) => {
-      let next = null;
-      if (e.key === 'ArrowRight') next = tiles[Math.min(i + 1, tiles.length - 1)];
-      else if (e.key === 'ArrowLeft') next = tiles[Math.max(i - 1, 0)];
-      else if (e.key === 'Home') next = tiles[0];
-      else if (e.key === 'End') next = tiles[tiles.length - 1];
-      else if (e.key === ' ') { e.preventDefault(); tile.click(); return; }
-      if (next) {
-        e.preventDefault();
-        next.focus();
-        next.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-      }
+      if (e.key === ' ') { e.preventDefault(); tile.click(); }
     });
   });
 
-  // Primary action: move into the section's detailed content below the hero.
   const motion = matchMedia('(prefers-reduced-motion: no-preference)');
+  const behavior = () => (motion.matches ? 'smooth' : 'auto');
+
+  // Step to the previous or next section, like moving along a console's row. Arrow keys and swipes
+  // replace the history entry so browsing the row doesn't fill up the back button.
+  function step(delta, { focus }) {
+    const i = SECTIONS.indexOf(current) + delta;
+    if (i < 0 || i >= SECTIONS.length) return;
+    const name = SECTIONS[i];
+    history.replaceState(null, '', `#${name}`);
+    select(name);
+    const tile = tiles[i];
+    setRoving(tile);
+    if (focus) tile.focus({ preventScroll: true });
+    tile.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    if (window.scrollY > 0) window.scrollTo({ top: 0, behavior: behavior() });
+  }
+
+  // Up and down jump between the things you can select (the tile row, the section's button, then
+  // its links and cards) instead of scrolling a little at a time.
+  const FOCUSABLE = 'a[href], button, [tabindex="0"]';
+  function stops() {
+    return [...document.querySelectorAll(FOCUSABLE)].filter(el =>
+      el.tabIndex >= 0 && !el.classList.contains('skip-link') &&
+      !el.closest('[hidden], [inert]') && el.getClientRects().length);
+  }
+  function move(delta) {
+    const list = stops();
+    const active = document.activeElement;
+    let i = list.indexOf(active);
+    if (i < 0) {
+      // Nothing selectable has focus (the page itself, or a heading the button moved to):
+      // continue from where that element sits in the page.
+      const after = active && active !== document.body
+        ? list.findIndex(el => active.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING)
+        : 1;
+      i = after < 0 ? list.length : after;
+      if (delta > 0) i -= 1;
+    }
+    const next = list[Math.max(0, Math.min(list.length - 1, i + delta))];
+    if (!next || next === active) return;
+    next.focus({ preventScroll: true });
+    if (next.closest('.hero')) window.scrollTo({ top: 0, behavior: behavior() });
+    else next.scrollIntoView({ block: 'center', behavior: behavior() });
+  }
+
+  const KEYS = {
+    ArrowLeft: () => step(-1, { focus: true }), a: () => step(-1, { focus: true }),
+    ArrowRight: () => step(1, { focus: true }), d: () => step(1, { focus: true }),
+    ArrowUp: () => move(-1), w: () => move(-1),
+    ArrowDown: () => move(1), s: () => move(1),
+  };
+  document.addEventListener('keydown', (e) => {
+    if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.target.closest('input, textarea, select, [contenteditable]')) return;
+    const fn = KEYS[e.key.length === 1 ? e.key.toLowerCase() : e.key];
+    if (!fn) return;
+    e.preventDefault();
+    fn();
+  });
+
+  // Phones: swipe left or right across the hero to change section. A swipe that starts on the
+  // tile row is left alone when that row scrolls sideways itself.
+  const heroEl = document.querySelector('.hero');
+  let touch = null;
+  heroEl.addEventListener('touchstart', (e) => {
+    const t = e.touches[0];
+    const row = document.getElementById('tiles');
+    const rowScrolls = row.scrollWidth > row.clientWidth + 4;
+    touch = e.touches.length === 1 && !(rowScrolls && e.target.closest('#tiles'))
+      ? { x: t.clientX, y: t.clientY, at: e.timeStamp } : null;
+  }, { passive: true });
+  heroEl.addEventListener('touchend', (e) => {
+    if (!touch) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touch.x, dy = t.clientY - touch.y;
+    const quick = e.timeStamp - touch.at < 700;
+    touch = null;
+    if (quick && Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1, { focus: false });
+  }, { passive: true });
+
+  // Primary action: move into the section's detailed content below the hero.
   document.querySelectorAll('.action').forEach(btn => btn.addEventListener('click', () => {
     const heading = document.querySelector(`.detail[data-detail="${btn.dataset.go}"] .detail-title`);
     content.scrollIntoView({ behavior: motion.matches ? 'smooth' : 'auto', block: 'start' });
@@ -125,6 +195,21 @@
   }
   new ResizeObserver(layout).observe(hero);
   layout();
+
+  // ---- Profile card clock: the visitor's local date and time, updated on the minute ----
+  const clock = document.getElementById('gc-clock');
+  const dateEl = document.getElementById('gc-date');
+  const dateFormat2 = new Intl.DateTimeFormat(undefined, { weekday: 'short', month: 'numeric', day: 'numeric' });
+  const timeFormat = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
+  function tick() {
+    const now = new Date();
+    dateEl.textContent = dateFormat2.format(now).replace(',', '');
+    clock.dateTime = now.toISOString();
+    clock.replaceChildren(...timeFormat.formatToParts(now).map(p =>
+      p.type === 'dayPeriod' ? Object.assign(document.createElement('small'), { textContent: p.value }) : p.value));
+    setTimeout(tick, 60000 - (now.getSeconds() * 1000 + now.getMilliseconds()) + 50);
+  }
+  tick();
 
   // ---- Writing list, from data/writing.json (see WRITING.md) ----
   let writingLoaded = false;
