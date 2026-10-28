@@ -16,8 +16,53 @@
     return SECTIONS.includes(name) ? name : null;
   };
 
+  // ---- Interface sounds: soft console-style ticks and chimes, synthesized (no audio files).
+  // They only play in response to the visitor's own input, and the speaker button mutes them.
+  const sound = (() => {
+    const toggle = document.getElementById('sound-toggle');
+    let on = true;
+    try { on = localStorage.getItem('sound') !== 'off'; } catch {}
+    let ctx = null;
+    const show = () => toggle.setAttribute('aria-pressed', String(on));
+    show();
+    toggle.addEventListener('click', () => {
+      on = !on;
+      try { localStorage.setItem('sound', on ? 'on' : 'off'); } catch {}
+      show();
+      if (on) play('confirm');
+    });
+    // One voice: a sine that glides from f0 to f1 with a quick attack and an exponential tail.
+    function tone(at, f0, f1, dur, peak, type = 'sine') {
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(f0, at);
+      osc.frequency.exponentialRampToValueAtTime(f1, at + dur);
+      gain.gain.setValueAtTime(0.0001, at);
+      gain.gain.exponentialRampToValueAtTime(peak, at + 0.006);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(at);
+      osc.stop(at + dur + 0.02);
+    }
+    const SOUNDS = {
+      tick: (t) => { tone(t, 2400, 1700, 0.035, 0.035); },                       // moving focus
+      move: (t) => { tone(t, 1480, 1240, 0.07, 0.05); tone(t, 2960, 2480, 0.05, 0.012); }, // changing section
+      confirm: (t) => { tone(t, 660, 660, 0.16, 0.05); tone(t + 0.05, 990, 990, 0.22, 0.045); tone(t + 0.05, 1980, 1980, 0.12, 0.008, 'triangle'); },
+    };
+    function play(name) {
+      if (!on) return;
+      try {
+        ctx ??= new AudioContext();
+        if (ctx.state === 'suspended') ctx.resume();
+        SOUNDS[name](ctx.currentTime + 0.005);
+      } catch {}
+    }
+    return { play };
+  })();
+
   function select(name) {
     if (name === current) return;
+    if (current) sound.play('move');
     current = name;
     root.dataset.section = name;
     for (const t of tiles) {
@@ -92,6 +137,7 @@
     const next = list[Math.max(0, Math.min(list.length - 1, i + delta))];
     if (!next || next === active) return;
     next.focus({ preventScroll: true });
+    sound.play('tick');
     if (next.closest('.hero')) window.scrollTo({ top: 0, behavior: behavior() });
     else next.scrollIntoView({ block: 'center', behavior: behavior() });
   }
@@ -130,6 +176,12 @@
     touch = null;
     if (quick && Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1, { focus: false });
   }, { passive: true });
+
+  // Buttons and links (other than the tiles, which make the section sound, and the speaker) chime.
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('a[href], button');
+    if (el && !el.classList.contains('tile') && el.id !== 'sound-toggle') sound.play('confirm');
+  });
 
   // Primary action: move into the section's detailed content below the hero.
   document.querySelectorAll('.action').forEach(btn => btn.addEventListener('click', () => {
