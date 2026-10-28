@@ -119,13 +119,14 @@ button { font: inherit; }
     max(28px, env(safe-area-inset-top)) max(var(--pad), env(safe-area-inset-right))
     max(48px, env(safe-area-inset-bottom)) max(var(--pad), env(safe-area-inset-left));
 }
+/* The page's h1. The profile card shows the name, so this one is for screen readers only. */
 .name {
-  margin: 0 0 10px;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /* ---- Profile card, top right, the same on every section (a Switch-style squircle) ---- */
@@ -400,6 +401,10 @@ a.card:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px)
 /* ---- Small screens ---- */
 @media (min-width: 701px) {
   .tiles { overflow: visible; }
+}
+/* Mid widths: the tile row and the profile card would collide, so drop the tiles below the card. */
+@media (min-width: 701px) and (max-width: 960px) {
+  .hero-inner { padding-top: max(100px, env(safe-area-inset-top)); }
 }
 @media (max-width: 700px) {
   :root { --tile: 66px; --gap: 4px; --small: 0.74; }
