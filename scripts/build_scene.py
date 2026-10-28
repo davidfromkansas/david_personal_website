@@ -6,7 +6,7 @@ Writes, for each camera (desk = 16:9 desktop, phone = 9:16 portrait):
   OUTDIR/scene-<cam>.png        the beauty render (screen off)
   OUTDIR/scene-<cam>-mask.png   white where the picture tube is visible
   OUTDIR/scene.json             screen corners and TV bounds, as 0..1 of the image
-Run: python3 build_scene.py OUTDIR [width_px] [samples] [desk|phone|both]
+Run: python3 build_scene.py OUTDIR [width_px] [samples] [desk|phone|home|all]
 """
 import json
 import math
@@ -200,6 +200,10 @@ CAMS = {
     "desk": dict(loc=(-0.70, -2.45, 1.40), target=(0.0, 0.0, 0.92), lens=38, res=(RES, round(RES * 9 / 16))),
     "phone": dict(loc=(-0.50, -2.05, 1.40), target=(-0.08, 0.0, 0.80), lens=30,
                   res=(round(RES * 9 / 16), RES)),
+    # Home screen background: the same view with the lens shifted so the desk sits
+    # on the right, leaving the left for the navigation and type.
+    "home": dict(loc=(-0.70, -2.45, 1.40), target=(0.0, 0.0, 0.92), lens=34, shift=(-0.2, 0.0),
+                 res=(RES, round(RES * 9 / 16))),
 }
 
 scene.render.engine = "CYCLES"
@@ -241,13 +245,14 @@ def to_image(cam, pts):
 
 meta = {}
 for name, c in CAMS.items():
-    if WHICH not in ("both", name):
+    if WHICH not in ("all", "both", name):
         continue
     bpy.ops.object.camera_add(location=c["loc"])
     cam = bpy.context.object
     cam.name = f"cam_{name}"
     cam.data.lens = c["lens"]
     cam.data.sensor_fit = "AUTO"
+    cam.data.shift_x, cam.data.shift_y = c.get("shift", (0, 0))
     d = Vector(c["target"]) - Vector(c["loc"])
     cam.rotation_euler = d.to_track_quat("-Z", "Y").to_euler()
     scene.camera = cam
