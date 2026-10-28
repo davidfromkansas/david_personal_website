@@ -10,6 +10,7 @@
   const details = [...document.querySelectorAll('.detail')];
   const content = document.getElementById('content');
   let current = null;
+  let live = null;   // the live beach, once it has started
 
   const fromHash = () => {
     const name = location.hash.slice(1);
@@ -33,6 +34,7 @@
     for (const d of details) d.hidden = d.dataset.detail !== name;
     document.title = name === 'home' ? TITLES.home : `${TITLES[name]} · ${TITLES.home}`;
     if (name === 'writing') loadWriting();
+    live?.resume();
   }
 
   // Clicks follow the tile's #hash link; hashchange covers clicks, back and forward alike.
@@ -149,8 +151,8 @@
   row.addEventListener('scroll', hint, { passive: true });
 
   // ---- Home scene: cover-fit the desk render and map the TV screensaver onto its glass ----
-  // Measured from the renders by scripts/build_scene.py (0..1 of the image).
-  const HOME = /* SCENES */ {"home":{"src":"art/home.webp","mask":"art/home-mask.png","width":2400,"height":1350,"screen":[[0.55228,0.34328],[0.68258,0.32723],[0.68296,0.5256],[0.55586,0.56292]]},"phone":{"src":"art/home-phone.webp","mask":"art/home-phone-mask.png","width":1350,"height":2400,"screen":[[0.26076,0.36082],[0.52133,0.34996],[0.5205,0.46912],[0.27118,0.49343]]}};
+  // The TV glass corners in each still (0..1 of the image), from scripts/render_beach.mjs.
+  const HOME = /* SCENES */ {"home":{"src":"art/home.webp","width":2400,"height":1350,"screen":[[0.61292,0.43435],[0.68036,0.432],[0.6804,0.5418],[0.61326,0.55048]]},"phone":{"src":"art/home-phone.webp","width":1350,"height":2400,"screen":[[0.31451,0.41141],[0.56201,0.40675],[0.56089,0.52448],[0.3182,0.54123]]}};
   const hero = document.querySelector('.hero');
   const stage = document.getElementById('home-stage');
   const img = document.getElementById('home-img');
@@ -178,7 +180,8 @@
     if (next !== homeScene) {
       homeScene = next;
       img.src = next.src;
-      glass.style.setProperty('--mask', `url(${next.mask})`);
+      if (next.mask) glass.style.setProperty('--mask', `url(${next.mask})`);
+      else glass.style.removeProperty('--mask');
     }
     // Cover: centred on desktop; on phones keep the TV in view.
     const s = Math.max(vw / next.width, vh / next.height);
@@ -195,6 +198,30 @@
   }
   new ResizeObserver(layout).observe(hero);
   layout();
+
+  // ---- Live beach: the still shows first; the moving ocean (art/beach/live.js, built from
+  // beach/) fades in over it once the page has loaded, where the device can run it ----
+  let heroVisible = true;
+  const liveActive = () => current === 'home' && heroVisible && !document.hidden;
+  new IntersectionObserver(([e]) => { heroVisible = e.isIntersecting; live?.resume(); }).observe(hero);
+  document.addEventListener('visibilitychange', () => live?.resume());
+  function startLive() {
+    const conn = navigator.connection;
+    if (!motion.matches || conn?.saveData || /2g|3g/.test(conn?.effectiveType || '')) return;
+    import('./art/beach/live.js').then(async (m) => {
+      if (!m.supported()) return;
+      live = await m.start({
+        stage,
+        shot: () => (homeScene === HOME.phone ? 'phone' : 'home'),
+        active: liveActive,
+        propsUrl: 'art/beach/props.glb',
+        small: matchMedia('(pointer: coarse)').matches || innerWidth < 700,
+      });
+    }).catch(() => {});
+  }
+  const whenIdle = (fn) => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 2000 }) : setTimeout(fn, 300));
+  if (document.readyState === 'complete') whenIdle(startLive);
+  else addEventListener('load', () => whenIdle(startLive), { once: true });
 
   // ---- Profile card clock: the visitor's local date and time, updated on the minute ----
   const clock = document.getElementById('gc-clock');
