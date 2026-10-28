@@ -128,7 +128,7 @@ button { font: inherit; }
   color: var(--muted);
 }
 
-/* ---- Profile card, top right, the same on every section ---- */
+/* ---- Profile card, top right, the same on every section (a Switch-style squircle) ---- */
 .gamercard {
   position: absolute;
   z-index: 2;
@@ -137,25 +137,22 @@ button { font: inherit; }
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 8px 8px 8px 18px;
-  border-radius: 14px;
-  background: rgba(10, 10, 14, 0.38);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(14px) saturate(1.2);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
-  text-align: right;
+  padding: 7px 20px 7px 7px;
+  border-radius: 22px;
+  background: #f4f4f4;
+  color: #2d2d2d;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  font-family: Nunito, Inter, system-ui, sans-serif;
+  white-space: nowrap;
 }
-.gc-text p { margin: 0; white-space: nowrap; }
-.gc-name { font-size: 17px; font-weight: 600; letter-spacing: 0.01em; }
-.gc-time { margin-top: 2px !important; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.gc-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 9px;
-  object-fit: cover;
-  border: 2px solid rgba(255, 255, 255, 0.85);
-}
+.gc-ring { display: block; padding: 3px; border-radius: 17px; background: #e60012; }
+.gc-avatar { display: block; width: 50px; height: 50px; border-radius: 14px; border: 3px solid #fff; object-fit: cover; }
+.gc-text { display: flex; flex-direction: column; }
+.gc-name { font-size: 17px; font-weight: 800; }
+.gc-date { font-size: 14px; font-weight: 600; color: #5a5a5a; }
+.gc-rule { width: 1.5px; height: 30px; background: #d0d0d0; }
+.gc-time { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.gc-time small { font-size: 13px; font-weight: 600; color: #5a5a5a; }
 
 /* ---- Tiles ---- */
 .tiles-wrap { position: relative; margin: 0 calc(-1 * var(--pad)); }
@@ -414,11 +411,15 @@ a.card:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px)
     background:
       linear-gradient(180deg, rgba(var(--shade), 0.7) 0%, rgba(var(--shade), 0) 30%, rgba(var(--shade), 0) 45%, rgba(var(--shade), 0.85) 78%, var(--bg) 100%);
   }
-  .gamercard { top: max(14px, env(safe-area-inset-top)); gap: 10px; padding: 6px 6px 6px 12px; border-radius: 12px; }
+  .gamercard { top: max(14px, env(safe-area-inset-top)); gap: 10px; padding: 5px 14px 5px 5px; border-radius: 17px; }
+  .gc-ring { padding: 2px; border-radius: 13px; }
+  .gc-avatar { width: 36px; height: 36px; border-radius: 11px; border-width: 2px; }
   .gc-name { font-size: 14px; }
-  .gc-time { font-size: 12px; }
-  .gc-avatar { width: 40px; height: 40px; border-radius: 7px; }
-  .hero-inner { padding-top: max(78px, env(safe-area-inset-top)); }
+  .gc-date { font-size: 12px; }
+  .gc-rule { height: 24px; }
+  .gc-time { font-size: 18px; }
+  .gc-time small { font-size: 11px; }
+  .hero-inner { padding-top: max(76px, env(safe-area-inset-top)); }
   .about { grid-template-columns: 1fr; }
   .portrait { max-width: 260px; }
   .essay a { grid-template-columns: 1fr; }

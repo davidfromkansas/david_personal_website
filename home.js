@@ -126,13 +126,17 @@
   new ResizeObserver(layout).observe(hero);
   layout();
 
-  // ---- Profile card clock: the visitor's local time and date, updated on the minute ----
+  // ---- Profile card clock: the visitor's local date and time, updated on the minute ----
   const clock = document.getElementById('gc-clock');
-  const clockFormat = new Intl.DateTimeFormat(undefined, { month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  const dateEl = document.getElementById('gc-date');
+  const dateFormat2 = new Intl.DateTimeFormat(undefined, { weekday: 'short', month: 'numeric', day: 'numeric' });
+  const timeFormat = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
   function tick() {
     const now = new Date();
+    dateEl.textContent = dateFormat2.format(now).replace(',', '');
     clock.dateTime = now.toISOString();
-    clock.textContent = clockFormat.format(now).replace(',', '');
+    clock.replaceChildren(...timeFormat.formatToParts(now).map(p =>
+      p.type === 'dayPeriod' ? Object.assign(document.createElement('small'), { textContent: p.value }) : p.value));
     setTimeout(tick, 60000 - (now.getSeconds() * 1000 + now.getMilliseconds()) + 50);
   }
   tick();
