@@ -1,5 +1,6 @@
-"""Render the opening scene: the TV turned slightly on a bamboo desk, with an
-office chair pushed in under the desk.
+"""Render the opening scene: the TV turned slightly on a bamboo desk, with a
+Herman Miller Aeron pushed in under the desk (needs scripts/models/aeron.obj,
+see chair_model.py).
 
 Writes, for each camera (desk = 16:9 desktop, phone = 9:16 portrait):
   OUTDIR/scene-<cam>.png        the beauty render (screen off)
@@ -162,7 +163,7 @@ nt.links.new(grad.outputs["Fac"], ramp.inputs["Fac"])
 nt.links.new(ramp.outputs["Color"], pp.inputs["Base Color"])
 cube("print", (0.54, 0.01, 0.38), (0.25, 0.414, 1.55), PRINT)
 
-# ---- Office chair pushed in under the desk ----
+# ---- Aeron pushed in under the desk ----
 chair = chair_model.build()
 chair.location = (0.34, -0.15, 0)
 chair.rotation_euler = (0, 0, math.radians(6))
