@@ -154,6 +154,23 @@ button { font: inherit; }
 .gc-rule { width: 1.5px; height: 30px; background: #d0d0d0; }
 .gc-time { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .gc-time small { font-size: 13px; font-weight: 600; color: #5a5a5a; }
+.gc-sound {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin: -4px -10px -4px -6px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: #5a5a5a;
+  cursor: pointer;
+}
+.gc-sound:hover { background: #e6e6e6; color: #2d2d2d; }
+.gc-sound:focus-visible { outline: 3px solid #e60012; outline-offset: 1px; }
+.gc-sound .gc-x { display: none; }
+.gc-sound[aria-pressed="false"] .gc-wave { display: none; }
+.gc-sound[aria-pressed="false"] .gc-x { display: inline; }
 
 /* ---- Tiles ---- */
 .tiles-wrap { position: relative; margin: 0 calc(-1 * var(--pad)); }
