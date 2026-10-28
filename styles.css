@@ -1,7 +1,9 @@
 /* Home screen: five sections, one stable row of tiles, a background scene per section. */
 :root {
-  --tile: clamp(76px, 6.4vw, 112px);
-  --gap: clamp(18px, 1.9vw, 30px);
+  /* --tile is the selected size; unselected tiles shrink inside the same slot. */
+  --tile: clamp(92px, 8vw, 132px);
+  --gap: clamp(4px, 0.5vw, 8px);
+  --small: 0.7;
   --pad: clamp(20px, 5vw, 80px);
   --ease: cubic-bezier(0.22, 0.8, 0.3, 1);
   --fast: 180ms;
@@ -160,7 +162,8 @@ button { font: inherit; }
   background: #222;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
   opacity: 0.72;
-  transform: scale(0.94);
+  transform: scale(var(--small));
+  transform-origin: 50% 100%;
   transition: transform var(--fast) var(--ease), opacity var(--fast) ease-out, box-shadow var(--fast) ease-out;
 }
 .tile-art img { width: 100%; height: 100%; object-fit: cover; }
@@ -179,12 +182,12 @@ button { font: inherit; }
   transition: color var(--fast) ease-out;
 }
 /* Hover: a quiet preview, the selection doesn't change. */
-.tile:hover .tile-art { opacity: 0.95; transform: scale(0.98); }
+.tile:hover .tile-art { opacity: 0.95; transform: scale(calc(var(--small) + 0.05)); }
 .tile:hover .tile-label { color: #fff; }
 /* Selected: larger, crisp white outline, soft glow in the section colour. */
 .tile[aria-current="page"] .tile-art {
   opacity: 1;
-  transform: scale(1.1);
+  transform: none;
   box-shadow: 0 0 0 3px #fff, 0 0 0 6px rgba(255, 255, 255, 0.18), 0 0 22px 2px color-mix(in srgb, var(--accent) 50%, transparent), 0 8px 18px rgba(0, 0, 0, 0.4);
 }
 .tile[aria-current="page"] .tile-label { color: #fff; font-weight: 600; }
@@ -373,7 +376,7 @@ a.card:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px)
   .tiles { overflow: visible; }
 }
 @media (max-width: 700px) {
-  :root { --tile: 60px; --gap: 12px; }
+  :root { --tile: 66px; --gap: 4px; --small: 0.74; }
   .hero-inner { padding-bottom: max(36px, env(safe-area-inset-bottom)); }
   .tile { gap: 10px; }
   .tile-label { font-size: 13px; }
@@ -396,5 +399,6 @@ a.card:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px)
   .scene { transition-duration: 150ms; }
   .panel, .panel.is-active { transform: none; transition: opacity 150ms, visibility 0s 150ms; }
   .panel.is-active { transition: opacity 150ms, visibility 0s; }
-  .tile-art, .tile:hover .tile-art, .tile[aria-current="page"] .tile-art, .card, .toys .toy, .toys .toy:hover, a.card:hover, .action:active { transform: none; }
+  .tile-art { transition: none; }
+  .card, .toys .toy, .toys .toy:hover, a.card:hover, .action:active { transform: none; }
 }
