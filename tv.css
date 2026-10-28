@@ -3,12 +3,12 @@
 :root {
   --room: #1c1a21;
   /* Screen opening, measured from the render's transparent glass. */
-  --scr-left: 12.45%;
-  --scr-top: 11.346%;
-  --scr-width: 75.1%;
-  --scr-height: 58.587%;
+  --scr-left: 10.45%;
+  --scr-top: 8.51%;
+  --scr-width: 79.1%;
+  --scr-height: 61.681%;
   --tv-aspect: 2000 / 1939;
-  --scr-radius: 6.6% / 8.7%;
+  --scr-radius: 5.2% / 6.8%;
   font-size: clamp(12px, 0.75vw + 9.5px, 16px);
 }
 

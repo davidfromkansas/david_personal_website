@@ -12,12 +12,12 @@ import bmesh
 # ---- Dimensions (scene units; body front face at y = -D/2) ----
 W, H, D = 2.0, 1.90, 1.40
 FRONT = -D / 2
-SCR_CZ = 1.115           # screen centre height
-OPEN_W, OPEN_H, OPEN_R = 1.70, 1.32, 0.17    # opening on the bezel face
-IN_W, IN_H, IN_R = 1.54, 1.17, 0.12          # bottom of the sloped lip
-RECESS = 0.11
-GLASS_W, GLASS_H, GLASS_R = 1.52, 1.15, 0.115
-MARGIN_X, MARGIN_TOP, MARGIN_BOT = 0.012, 0.012, 0.05
+SCR_CZ = 1.14            # screen centre height
+OPEN_W, OPEN_H, OPEN_R = 1.80, 1.38, 0.17    # opening on the bezel face
+IN_W, IN_H, IN_R = 1.62, 1.23, 0.10          # bottom of the rolled lip
+RECESS = 0.12
+GLASS_W, GLASS_H, GLASS_R = 1.60, 1.21, 0.095
+SHELL = 0.30             # depth of the front bezel shell (then a seam step)
 
 scene = None
 
@@ -128,12 +128,12 @@ def build(glass_mode="holdout"):
     global scene
     scene = bpy.context.scene
     before = set(scene.objects)
-    SILVER = mat("silver", (0.56, 0.575, 0.60), metallic=0.75, rough=0.34, coat=0.2)
-    SILVER_LT = mat("silver_light", (0.66, 0.67, 0.70), metallic=0.7, rough=0.28, coat=0.3)
+    SILVER = mat("silver", (0.64, 0.65, 0.67), metallic=0.65, rough=0.32, coat=0.35)
+    SILVER_LT = mat("silver_light", (0.74, 0.75, 0.77), metallic=0.6, rough=0.26, coat=0.4)
     DARK = mat("dark", (0.018, 0.018, 0.02), rough=0.45)
     GASKET = mat("gasket", (0.008, 0.008, 0.009), rough=0.6)
     SLOT = mat("slot", (0.004, 0.004, 0.005), rough=0.7)
-    PANEL = mat("panel", (0.16, 0.165, 0.175), metallic=0.4, rough=0.45)
+    PANEL = mat("panel", (0.035, 0.036, 0.04), metallic=0.2, rough=0.5)
     INK = mat("ink", (0.10, 0.105, 0.11), rough=0.5)
     LED = mat("led", (0.2, 0.9, 0.3), emission=(0.25, 1.0, 0.35))
 
@@ -146,14 +146,14 @@ def build(glass_mode="holdout"):
     nt.links.new(ho.outputs[0], outn.inputs["Surface"])
 
 
-    # ---- Body: rounded box with the screen recess cut out ----
+    # ---- Front bezel shell: a pillowy rounded box with the screen recess cut out ----
     body = loft("body", [
-        (FRONT, H / 2, W, H, 0.16),
-        (FRONT + 0.62, H / 2, W, H, 0.16),
+        (FRONT, H / 2, W, H, 0.17),
+        (FRONT + SHELL, H / 2, W, H, 0.17),
     ])
     bev = body.modifiers.new("soft_edges", "BEVEL")
-    bev.width = 0.07
-    bev.segments = 10
+    bev.width = 0.11
+    bev.segments = 14
     bev.limit_method = "ANGLE"
     bev.angle_limit = math.radians(60)
     bpy.context.view_layer.objects.active = body
@@ -161,12 +161,16 @@ def build(glass_mode="holdout"):
     bpy.ops.object.modifier_apply(modifier="soft_edges")
     link(body, SILVER)
 
-    cutter = loft("cutter", [
-        (FRONT - 0.2, SCR_CZ, OPEN_W, OPEN_H, OPEN_R),
-        (FRONT + 0.004, SCR_CZ, OPEN_W, OPEN_H, OPEN_R),
-        (FRONT + RECESS, SCR_CZ, IN_W, IN_H, IN_R),
-        (FRONT + 0.6, SCR_CZ, IN_W, IN_H, IN_R),
-    ])
+    # The opening rolls over a rounded lip down to the tube (convex quarter round).
+    rings = [(FRONT - 0.2, SCR_CZ, OPEN_W, OPEN_H, OPEN_R)]
+    for k in range(9):
+        t = math.radians(90 * k / 8)
+        f = math.sin(t)
+        rings.append((FRONT + 0.002 + RECESS * (1 - math.cos(t)), SCR_CZ,
+                      OPEN_W - (OPEN_W - IN_W) * f, OPEN_H - (OPEN_H - IN_H) * f,
+                      OPEN_R - (OPEN_R - IN_R) * f))
+    rings.append((FRONT + SHELL + 0.2, SCR_CZ, IN_W, IN_H, IN_R))
+    cutter = loft("cutter", rings)
     boo = body.modifiers.new("recess", "BOOLEAN")
     boo.operation = "DIFFERENCE"
     boo.object = cutter
@@ -174,22 +178,28 @@ def build(glass_mode="holdout"):
     bpy.ops.object.modifier_apply(modifier="recess")
     cutter.hide_render = True
     cutter.hide_viewport = True
-
-    # Soften the lip where the bezel turns into the recess.
-    lip = body.modifiers.new("lip", "BEVEL")
-    lip.width = 0.012
-    lip.segments = 4
-    lip.limit_method = "ANGLE"
-    lip.angle_limit = math.radians(20)
     bpy.ops.object.shade_smooth()
     for poly in body.data.polygons:
         poly.use_smooth = True
     try:
-        body.data.set_sharp_from_angle(angle=math.radians(35))
+        body.data.set_sharp_from_angle(angle=math.radians(40))
     except Exception:
         pass
 
-    # ---- Black gasket and the convex glass (holdout = transparent) ----
+    # Back shell, a step smaller than the bezel so the seam reads from the side.
+    back = loft("back_shell", [
+        (FRONT + SHELL - 0.02, H / 2, W - 0.05, H - 0.05, 0.15),
+        (FRONT + 0.62, H / 2, W - 0.05, H - 0.05, 0.15),
+    ])
+    bb = back.modifiers.new("b", "BEVEL"); bb.width = 0.06; bb.segments = 8
+    bb.limit_method = "ANGLE"
+    bpy.ops.object.select_all(action="DESELECT")
+    bpy.context.view_layer.objects.active = back
+    back.select_set(True)
+    bpy.ops.object.shade_smooth()
+    link(back, SILVER)
+
+    # ---- Black gasket and the glass (holdout = transparent) ----
     gasket = loft("gasket", [
         (FRONT + RECESS - 0.004, SCR_CZ, IN_W + 0.02, IN_H + 0.02, IN_R),
         (FRONT + RECESS + 0.05, SCR_CZ, IN_W + 0.02, IN_H + 0.02, IN_R),
@@ -207,49 +217,62 @@ def build(glass_mode="holdout"):
     scene.collection.objects.link(glass)
     link(glass, HOLDOUT)
 
-    # ---- Lower deck ----
-    DECK_TOP = SCR_CZ - OPEN_H / 2      # 0.455
+    # ---- Lower deck, laid out like a Magnavox 13" TV/DVD ----
+    DECK_TOP = SCR_CZ - OPEN_H / 2      # 0.46
     fz = FRONT - 0.0005
+    lx = -0.06                          # loader centre
 
-    text("brand", "DAVIDVISION", 0.046, (0, fz - 0.002, DECK_TOP - 0.052), INK, extrude=0.003)
+    # Brand on a little L-shaped rule above the loader.
+    text("brand", "DAVIDVISION", 0.040, (lx, fz - 0.002, DECK_TOP - 0.058), INK, extrude=0.003)
+    box("rule_h", (0.36, 0.004, 0.005), (lx, fz - 0.001, DECK_TOP - 0.087), INK)
+    box("rule_v", (0.005, 0.004, 0.04), (lx - 0.18, fz - 0.001, DECK_TOP - 0.068), INK)
 
-    # DVD loader: raised rounded plate with a dark slot and a tiny logo.
-    slot_z = DECK_TOP - 0.155
-    plate = loft("slot_plate", [
-        (fz - 0.012, slot_z, 0.96, 0.105, 0.03),
-        (fz + 0.02, slot_z, 0.96, 0.105, 0.03),
+    # DVD loader: dark outline, a recessed tray face with the slot and logo.
+    slot_z = DECK_TOP - 0.175
+    outline = loft("loader_outline", [
+        (fz - 0.001, slot_z, 0.97, 0.115, 0.027),
+        (fz + 0.01, slot_z, 0.97, 0.115, 0.027),
     ])
-    pb = plate.modifiers.new("b", "BEVEL"); pb.width = 0.008; pb.segments = 3
-    link(plate, SILVER)
+    link(outline, DARK)
+    tray = loft("loader_tray", [
+        (fz - 0.003, slot_z, 0.95, 0.10, 0.022),
+        (fz + 0.02, slot_z, 0.95, 0.10, 0.022),
+    ])
+    tb = tray.modifiers.new("b", "BEVEL"); tb.width = 0.006; tb.segments = 3
+    link(tray, SILVER_LT)
     slot = loft("slot", [
-        (fz - 0.0135, slot_z + 0.006, 0.82, 0.016, 0.008),
-        (fz - 0.010, slot_z + 0.006, 0.82, 0.016, 0.008),
+        (fz - 0.0045, slot_z + 0.030, 0.86, 0.012, 0.006),
+        (fz - 0.0025, slot_z + 0.030, 0.86, 0.012, 0.006),
     ])
     link(slot, SLOT)
-    text("dvd_logo", "DVD", 0.024, (0, fz - 0.0135, slot_z - 0.030), INK, extrude=0.0008)
+    text("dvd_logo", "DVD", 0.036, (lx, fz - 0.0045, slot_z - 0.012), INK, extrude=0.001)
+    text("dvd_sub", "VIDEO", 0.011, (lx, fz - 0.0045, slot_z - 0.036), INK, extrude=0.0005, font_bold=False)
 
-    # Button row under the loader.
-    btn_z = slot_z - 0.115
-    for i, x in enumerate([-0.30, -0.20, -0.10, 0.0, 0.10, 0.20, 0.30]):
-        if i == 3:
-            box("ir_window", (0.085, 0.01, 0.034), (x, fz - 0.004, btn_z), DARK, bevel=0.012)
-            continue
-        cyl(f"btn{i}", 0.022, 0.024, (x, fz - 0.008, btn_z), SILVER_LT, bevel=0.006)
-        cyl(f"btn_ring{i}", 0.027, 0.006, (x, fz - 0.001, btn_z), DARK)
+    # Big round power (left) and open/close (right) buttons beside the loader.
+    for name, x in (("power", -0.76), ("eject", 0.62)):
+        cyl(f"{name}_ring", 0.052, 0.006, (x, fz - 0.001, slot_z), DARK)
+        cyl(name, 0.043, 0.032, (x, fz - 0.013, slot_z), SILVER_LT, bevel=0.012)
+    text("power_lbl", "POWER", 0.015, (-0.76, fz - 0.002, slot_z + 0.075), INK, extrude=0.0005, font_bold=False)
+    text("eject_lbl", "OPEN/CLOSE", 0.013, (0.62, fz - 0.002, slot_z + 0.072), INK, extrude=0.0005, font_bold=False)
+    cyl("led", 0.008, 0.01, (-0.64, fz - 0.003, slot_z - 0.03), LED)
 
-    # Power button + standby LED on the left.
-    cyl("power_ring", 0.050, 0.006, (-0.76, fz - 0.001, slot_z - 0.04), DARK)
-    cyl("power", 0.042, 0.03, (-0.76, fz - 0.012, slot_z - 0.04), SILVER_LT, bevel=0.01)
-    cyl("led", 0.009, 0.01, (-0.62, fz - 0.003, slot_z - 0.04), LED)
-    text("power_lbl", "POWER", 0.018, (-0.76, fz - 0.002, slot_z + 0.036), INK, extrude=0.0005, font_bold=False)
+    # Small buttons in pairs under the loader, then the IR window and a logo.
+    btn_z = slot_z - 0.12
+    for i, x in enumerate([-0.48, -0.40, -0.28, -0.20, -0.08]):
+        cyl(f"btn_ring{i}", 0.026, 0.006, (x, fz - 0.001, btn_z), DARK)
+        cyl(f"btn{i}", 0.020, 0.022, (x, fz - 0.008, btn_z), SILVER_LT, bevel=0.006)
+    box("ir_window", (0.075, 0.01, 0.036), (0.05, fz - 0.004, btn_z), DARK, bevel=0.016)
+    text("tv_logo", "TV·DVD", 0.022, (0.22, fz - 0.002, btn_z), INK, extrude=0.001)
 
-    # AV jacks on the right.
-    jack_z = slot_z - 0.06
-    box("jack_panel", (0.30, 0.006, 0.09), (0.70, fz - 0.002, jack_z), PANEL, bevel=0.025)
-    for j, x in enumerate([0.61, 0.70, 0.79]):
-        cyl(f"jack{j}", 0.026, 0.02, (x, fz - 0.010, jack_z), SILVER_LT, bevel=0.004)
-        cyl(f"jack_hole{j}", 0.009, 0.02, (x, fz - 0.012, jack_z), SLOT)
-    text("av_lbl", "VIDEO   L-AUDIO-R", 0.015, (0.70, fz - 0.002, jack_z + 0.068), INK, extrude=0.0005, font_bold=False)
+    # AV inputs in a dark recessed panel, bottom right.
+    jack_z = btn_z - 0.005
+    box("jack_panel", (0.34, 0.006, 0.085), (0.70, fz - 0.001, jack_z), PANEL, bevel=0.003)
+    for j, (x, ring) in enumerate([(0.585, (0.85, 0.65, 0.05)), (0.665, (0.85, 0.85, 0.82)), (0.80, None)]):
+        ring_mat = mat(f"jack_ring{j}", ring, rough=0.4) if ring else DARK
+        cyl(f"jack{j}", 0.025, 0.02, (x, fz - 0.010, jack_z), SILVER_LT, bevel=0.004)
+        cyl(f"jack_ring{j}", 0.017, 0.022, (x, fz - 0.011, jack_z), ring_mat)
+        cyl(f"jack_hole{j}", 0.008, 0.024, (x, fz - 0.012, jack_z), SLOT)
+    text("av_lbl", "VIDEO  AUDIO        PHONES", 0.011, (0.70, fz - 0.002, jack_z + 0.06), INK, extrude=0.0005, font_bold=False)
 
     # Feet.
     for x in (-0.72, 0.72):

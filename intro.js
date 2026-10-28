@@ -6,7 +6,7 @@
   if (!root.classList.contains('intro-on')) return;
 
   // Measured from the renders by scripts/build_scene.py (0..1 of the image).
-  const SCENES = /* SCENES */ {"desk":{"src":"tv/scene-desk.webp","mask":"tv/scene-desk-mask.png","width":1920,"height":1080,"screen":[[0.33973,0.3359],[0.47793,0.31775],[0.47839,0.52894],[0.34341,0.56852]],"tv":[0.23209,0.27113,0.50192,0.68577]},"phone":{"src":"tv/scene-phone.webp","mask":"tv/scene-phone-mask.png","width":1080,"height":1920,"screen":[[0.26946,0.3669],[0.51654,0.35594],[0.51593,0.46939],[0.27898,0.49247]],"tv":[0.10736,0.32899,0.55876,0.55496]}};
+  const SCENES = /* SCENES */ {"desk":{"src":"tv/scene-desk.webp","mask":"tv/scene-desk-mask.png","width":1920,"height":1080,"screen":[[0.3349,0.32484],[0.48053,0.3069],[0.48096,0.52861],[0.3389,0.57032]],"tv":[0.23209,0.2726,0.50192,0.68577]},"phone":{"src":"tv/scene-phone.webp","mask":"tv/scene-phone-mask.png","width":1080,"height":1920,"screen":[[0.26076,0.36082],[0.52133,0.34996],[0.5205,0.46912],[0.27118,0.49343]],"tv":[0.10736,0.32899,0.55876,0.55496]}};
 
   const intro = document.getElementById('intro');
   const stage = document.getElementById('intro-stage');

@@ -129,7 +129,7 @@ rig, glass = tv_model.build("crt")
 rig.scale = (0.25, 0.25, 0.25)
 # The room light is flatter than the studio the frame was shot in; darken the
 # plastic a touch so it still reads as silver rather than white.
-for name, col in (("silver", (0.40, 0.41, 0.43)), ("silver_light", (0.48, 0.49, 0.51))):
+for name, col in (("silver", (0.46, 0.47, 0.49)), ("silver_light", (0.54, 0.55, 0.57))):
     bpy.data.materials[name].node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (*col, 1)
 rig.rotation_euler = (0, 0, TV_YAW)
 rig.location = (-0.30, 0.04, DESK_TOP - 0.25 * 0.012)
