@@ -1,0 +1,84 @@
+/* Opening scene (intro.js). Shown only while <html> has .intro-on. */
+.intro { display: none; }
+.intro-on body { overflow: hidden; }
+.intro-on .intro {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  overflow: hidden;
+  background: #241d1c;
+  transition: opacity 0.65s ease;
+}
+
+.intro-stage {
+  position: absolute;
+  transition: transform 1.1s cubic-bezier(0.6, 0, 0.25, 1);
+}
+.intro-stage img#intro-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* The picture tube: clipped by the rendered mask so the bezel still covers its edges. */
+.intro-glass {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  -webkit-mask: var(--mask) 0 0 / 100% 100% no-repeat;
+  mask: var(--mask) 0 0 / 100% 100% no-repeat;
+  opacity: 0;
+}
+.intro-pic {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1080px;
+  height: 818px;
+  transform-origin: 0 0;
+  max-width: none;
+}
+.intro-hit {
+  position: absolute;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+}
+.intro-hit:focus-visible { outline: 3px solid #f6d6de; outline-offset: 6px; }
+.intro-hit:hover ~ .intro-glass, .intro-hit:focus-visible ~ .intro-glass { opacity: 0.12; }
+
+.intro-hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: max(28px, env(safe-area-inset-bottom, 0px));
+  margin: 0;
+  text-align: center;
+  font: 600 clamp(11px, 1vw, 14px)/1 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  letter-spacing: 0.24em;
+  color: #f6d6de;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+/* Turning on */
+.intro.is-on .intro-hint { opacity: 0; transition: opacity 0.2s; }
+.intro.is-on .intro-glass { opacity: 1; transition: opacity 0.1s; }
+.intro.is-on .intro-pic { animation: intro-warm 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.intro.is-on .intro-hit { cursor: default; }
+.intro.is-leaving { opacity: 0; }
+
+@keyframes intro-warm {
+  0% { clip-path: inset(49.6% 0 49.6% 0); filter: brightness(5) saturate(0); }
+  30% { clip-path: inset(49.6% 0 49.6% 0); filter: brightness(5) saturate(0); }
+  70% { clip-path: inset(0 0 0 0); filter: brightness(1.8) saturate(0.7); }
+  100% { clip-path: inset(0 0 0 0); filter: brightness(1.05) saturate(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-stage, .intro-on .intro { transition: none; }
+  .intro.is-on .intro-pic { animation: none; }
+}

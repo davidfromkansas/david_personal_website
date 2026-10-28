@@ -11,11 +11,26 @@
   <!-- Link to external CSS -->
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="tv.css" />
+  <link rel="stylesheet" href="intro.css" />
+  <script>
+    // First visit in this tab (and not a deep link to Press/Writing): open on the desk scene.
+    try { if (!/^#(press|writing)$/.test(location.hash) && !sessionStorage.getItem('tv-on')) document.documentElement.classList.add('intro-on'); } catch (e) {}
+  </script>
   <link rel="preload" as="image" href="tv/tv-1400.webp" imagesrcset="tv/tv-800.webp 800w, tv/tv-1400.webp 1400w, tv/tv-2000.webp 2000w" imagesizes="100vw">
 
 
 </head>
 <body>
+  <div id="intro" class="intro" role="region" aria-label="Welcome">
+    <div id="intro-stage" class="intro-stage">
+      <img id="intro-img" alt="A silver 2000s TV on a bamboo desk, with a mesh office chair pushed in under the desk">
+      <button id="intro-hit" class="intro-hit" type="button" aria-label="Turn on the TV"></button>
+      <div id="intro-glass" class="intro-glass" aria-hidden="true">
+        <img id="intro-pic" class="intro-pic" src="tv/screen.webp" width="1080" height="818" alt="">
+      </div>
+    </div>
+    <p class="intro-hint">CLICK THE TV TO TURN IT ON</p>
+  </div>
   <div id="tv-track" class="tv-track">
   <div id="tv" class="tv">
   <div id="tv-screen" class="tv-screen">
@@ -126,5 +141,6 @@
   </div>
   <script src="writing.js" defer></script>
   <script src="tv.js" defer></script>
+  <script src="intro.js" defer></script>
 </body>
 </html>
