@@ -1,0 +1,14 @@
+{
+  "name": "beach",
+  "private": true,
+  "type": "module",
+  "description": "Live beach scene for the home screen (see README.md)",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "three": "0.186.1",
+    "vite": "8.3.5"
+  }
+}
