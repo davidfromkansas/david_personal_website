@@ -80,7 +80,7 @@
 
   // ---- Home scene: cover-fit the desk render and map the TV screensaver onto its glass ----
   // Measured from the renders by scripts/build_scene.py (0..1 of the image).
-  const HOME = /* SCENES */ {"home":{"src":"art/home.webp","mask":"art/home-mask.png","width":960,"height":540,"screen":[[0.55228,0.34328],[0.68258,0.32723],[0.68296,0.5256],[0.55586,0.56292]]},"phone":{"src":"art/home-phone.webp","mask":"art/home-phone-mask.png","width":540,"height":960,"screen":[[0.26076,0.36082],[0.52133,0.34996],[0.5205,0.46912],[0.27118,0.49343]]}};
+  const HOME = /* SCENES */ {"home":{"src":"art/home.webp","mask":"art/home-mask.png","width":2400,"height":1350,"screen":[[0.55228,0.34328],[0.68258,0.32723],[0.68296,0.5256],[0.55586,0.56292]]},"phone":{"src":"art/home-phone.webp","mask":"art/home-phone-mask.png","width":1350,"height":2400,"screen":[[0.26076,0.36082],[0.52133,0.34996],[0.5205,0.46912],[0.27118,0.49343]]}};
   const hero = document.querySelector('.hero');
   const stage = document.getElementById('home-stage');
   const img = document.getElementById('home-img');
