@@ -14,6 +14,6 @@ The importer preserves older entries no longer present in RSS. To remove an unpu
 
 `python3 -m unittest discover -s scripts -p 'test_*.py'`
 
-`node --check writing.js`
+`node --check home.js`
 
-Preview through an HTTP server (`python3 -m http.server 8765`) and open `http://localhost:8765/#writing`. Verify search, navigation, original article links, narrow-screen layout, and the no-results state.
+Preview through an HTTP server (`python3 -m http.server 8765`) and open `http://localhost:8765/#writing`. Verify the list, original article links and the narrow-screen layout.

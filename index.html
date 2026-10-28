@@ -1,146 +1,238 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-section="home">
 <head>
   <meta charset="UTF-8" />
-  <meta name="description" content="Meet David Lie-Tjauw" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="David Lie-Tjauw: product manager, builder and writer. Work, writing, press and side projects." />
+  <meta name="theme-color" content="#120e0c" />
   <link rel="icon" href="david_favicon.ico">
-
   <title>David Lie-Tjauw</title>
-
-  <!-- Link to external CSS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="tv.css" />
-  <link rel="stylesheet" href="intro.css" />
-  <script>
-    // First visit in this tab (and not a deep link to Press/Writing): open on the desk scene.
-    try { if (!/^#(press|writing)$/.test(location.hash) && !sessionStorage.getItem('tv-on')) document.documentElement.classList.add('intro-on'); } catch (e) {}
-  </script>
-  <link rel="preload" as="image" href="tv/tv-1400.webp" imagesrcset="tv/tv-800.webp 800w, tv/tv-1400.webp 1400w, tv/tv-2000.webp 2000w" imagesizes="100vw">
-
-
+  <link rel="preload" as="image" href="art/home.webp" media="(min-aspect-ratio: 9/10)">
+  <link rel="preload" as="image" href="art/home-phone.webp" media="(max-aspect-ratio: 9/10)">
 </head>
 <body>
-  <div id="intro" class="intro" role="region" aria-label="Welcome">
-    <div id="intro-stage" class="intro-stage">
-      <img id="intro-img" alt="A silver 2000s TV on a bamboo desk, with a mesh office chair pushed in under the desk">
-      <button id="intro-hit" class="intro-hit" type="button" aria-label="Turn on the TV"></button>
-      <div id="intro-glass" class="intro-glass" aria-hidden="true">
-        <img id="intro-pic" class="intro-pic" src="tv/screen.webp" width="1080" height="818" alt="">
+  <a class="skip-link" href="#content">Skip to content</a>
+
+  <header class="hero" id="top">
+    <!-- Background scenes, one per section. They crossfade when the selection changes. -->
+    <div class="scenes" aria-hidden="true">
+      <div class="scene is-active" data-scene="home">
+        <div class="scene-drift">
+          <div class="home-stage" id="home-stage">
+            <img id="home-img" class="home-img" src="art/home.webp" alt="">
+            <div class="tv-glass" id="tv-glass">
+              <div class="tv-screen" id="tv-screen">
+                <div class="tv-bounce-x"><div class="tv-bounce-y"><span class="tv-logo">DAVID<br>VISION</span></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="scene" data-scene="work">
+        <div class="scene-drift"><img class="scene-img" src="art/work.webp" srcset="art/work-1200.webp 1200w, art/work.webp 2400w" sizes="100vw" alt="" loading="lazy"></div>
+      </div>
+      <div class="scene" data-scene="writing">
+        <div class="scene-drift"><img class="scene-img" src="art/writing.webp" srcset="art/writing-1200.webp 1200w, art/writing.webp 2400w" sizes="100vw" alt="" loading="lazy"></div>
+      </div>
+      <div class="scene" data-scene="press">
+        <div class="scene-drift"><img class="scene-img" src="art/press.webp" srcset="art/press-1200.webp 1200w, art/press.webp 2400w" sizes="100vw" alt="" loading="lazy"></div>
+      </div>
+      <div class="scene" data-scene="fun">
+        <div class="scene-drift"><img class="scene-img" src="art/fun.webp" srcset="art/fun-1200.webp 1200w, art/fun.webp 2400w" sizes="100vw" alt="" loading="lazy"></div>
+      </div>
+      <div class="scene-shade"></div>
+    </div>
+
+    <div class="hero-inner">
+      <h1 class="name">David Lie-Tjauw</h1>
+
+      <nav class="tiles-wrap" aria-label="Sections">
+        <ul class="tiles" id="tiles">
+          <li><a class="tile" href="#home" data-section="home" aria-current="page">
+            <span class="tile-art"><img src="art/tile-home.webp" alt="" width="160" height="160"></span>
+            <span class="tile-label">Home</span></a></li>
+          <li><a class="tile" href="#work" data-section="work" tabindex="-1">
+            <span class="tile-art"><img src="art/tile-work.webp" alt="" width="160" height="160"></span>
+            <span class="tile-label">Work</span></a></li>
+          <li><a class="tile" href="#writing" data-section="writing" tabindex="-1">
+            <span class="tile-art"><img src="art/tile-writing.webp" alt="" width="160" height="160"></span>
+            <span class="tile-label">Writing</span></a></li>
+          <li><a class="tile" href="#press" data-section="press" tabindex="-1">
+            <span class="tile-art"><img src="art/tile-press.webp" alt="" width="160" height="160"></span>
+            <span class="tile-label">Press</span></a></li>
+          <li><a class="tile" href="#fun" data-section="fun" tabindex="-1">
+            <span class="tile-art"><img src="art/tile-fun.webp" alt="" width="160" height="160"></span>
+            <span class="tile-label">Fun</span></a></li>
+        </ul>
+        <span class="tiles-more" aria-hidden="true">›</span>
+      </nav>
+
+      <!-- Hero copy for each section, stacked in one grid cell so switching never shifts the layout. -->
+      <div class="panels">
+        <section class="panel is-active" data-panel="home" aria-labelledby="panel-home">
+          <h2 id="panel-home" class="panel-title">Hi, I'm David</h2>
+          <p class="panel-desc">Senior Product Manager at eBay, building AI-driven personalization for shopping. Before that: Twitter Shopping, Twitter Growth, and Google's APM program.</p>
+          <button class="action" type="button" data-go="home">About me</button>
+        </section>
+        <section class="panel" data-panel="work" aria-labelledby="panel-work" inert>
+          <h2 id="panel-work" class="panel-title">Work</h2>
+          <p class="panel-desc">Consumer products I've taken from zero to one at eBay, Twitter and Google, plus the engineering that came before.</p>
+          <button class="action" type="button" data-go="work">Explore my work</button>
+        </section>
+        <section class="panel" data-panel="writing" aria-labelledby="panel-writing" inert>
+          <h2 id="panel-writing" class="panel-title">Writing</h2>
+          <p class="panel-desc">Essays, ideas and notes from my Substack.</p>
+          <button class="action" type="button" data-go="writing">Read my writing</button>
+        </section>
+        <section class="panel" data-panel="press" aria-labelledby="panel-press" inert>
+          <h2 id="panel-press" class="panel-title">Press</h2>
+          <p class="panel-desc">Coverage of launches I've worked on, from TechCrunch to The Verge, and a home for interviews, podcasts and talks.</p>
+          <button class="action" type="button" data-go="press">Browse appearances</button>
+        </section>
+        <section class="panel" data-panel="fun" aria-labelledby="panel-fun" inert>
+          <h2 id="panel-fun" class="panel-title">Fun</h2>
+          <p class="panel-desc">Side projects, experiments and little tools I build for the joy of it.</p>
+          <button class="action" type="button" data-go="fun">Explore for fun</button>
+        </section>
       </div>
     </div>
-    <p class="intro-hint">CLICK THE TV TO TURN IT ON</p>
-  </div>
-  <div id="tv-track" class="tv-track">
-  <div id="tv" class="tv">
-  <div id="tv-screen" class="tv-screen">
-  <div id="site-shell" class="container">
-    <header class="header">
-      <a href="#home" class="site-title">David Lie-Tjauw</a>
-      <nav class="nav-right" aria-label="Main navigation">
-        <a href="david_lietjauw_resume.pdf" target="_blank" rel="noopener" class="nav-link"><b>Resume</b></a>
-        <a href="#press" class="nav-link" data-section="press"><b>Press</b></a>
-        <a href="#writing" class="nav-link" data-section="writing"><b>Writing</b></a>
-      </nav>
-    </header>
-    <main id="main-container">
-      <section id="home-view">
-    <img id="profile_img" src="better.jpg" alt="David Lie-Tjauw"/>
+  </header>
 
-    <h1>Hi, I'm David 👋</h1>
-    <p>As a Product Manager, David brings expertise in AI-driven personalization for shopping from eBay and experience in social commerce and growth from working on consumer product at Twitter. 
-      <p>He has a successful track record of getting 0-to-1 products off the ground by listening to customer needs and forming data-driven hypotheses that unlock Product Market Fit.</p><p> Most of all, David enjoys rallying xfn teams of passionate engineers, designers, and researchers around our customers, which have included everyday people, businesses, and advertisers. </p>
-
-
-    <H1>Work</H1>
-    <p>David currently works at eBay as a Senior Product Manager where he launched <a href="https://www.linkedin.com/feed/update/urn:li:activity:7203174007599198208/">"Explore"</a> -- an endless algorithmic feed experience that allows shoppers to easily browse relevant item recommendations that are personalized based on who you are and what you like. Try it here: <a href="https://www.ebay.com/explore">www.ebay.com/explore </a>
-    </p>
-
-    <p>Previously at Twitter, David was the first PM for the Twitter Shopping team where he quickly launched new, monetizable shopping experiences like <a href="https://blog.x.com/en_us/topics/product/2022/twitter-shops-more-space-to-shop">Twitter Shops</a>, <a href="https://blog.x.com/en_us/topics/product/2021/watch--chat--shop--live-shopping-on-twitter">Live Shopping</a>, <a href="https://techcrunch.com/2021/07/28/twitter-launches-u-s-e-commerce-pilot-that-lets-users-shop-from-profiles/">Shoppable Profiles</a>, and <a href="https://blog.x.com/en_us/topics/product/2022/be-part-of-the-hype--introducing-product-drops">Product Drops</a>. He also bootstrapped Twitter's merchant base from 0 to 10,000 in <1 year. 
-    </p>
-
-    <p>David initially joined Twitter as a PM on the Growth Acquisition team, driving a +20 million increase in DAUs by leading efforts to drive more <a href="https://www.theverge.com/2021/8/2/22606150/twitter-third-party-apple-google-login-signup-feature">logins and signups</a> while inventing ways to boost Twitter content virality across popular internet real estate like <a href="https://www.theverge.com/2021/6/23/22546672/twitter-instagram-stories-share-tweets-ios">Instagram</a> and <a href="https://www.theverge.com/2020/12/10/22166657/twitter-share-tweets-snapchat-snap-ios-feature-launch">Snap</a>.
-    </p>
-
-
-    <p> Originally, David started his PM journey in Google’s Associate Product Manager program, launching <a href="https://9to5google.com/2019/06/26/release-notes-web-app-chrome-os/">“What’s New"</a> -- a new experience that showcases major ChromeOS updates on all Chomebooks and your Chrome Browser.
-    </p>
-
-    <p>David has a B.S. in Computer Science from Washington University in Saint Louis. While in college, he was classically trained as a software engineer.
-    </p>
-    <ul>
-      <li>At Google, he shipped a <a href="https://web.archive.org/web/20190318111731/https://cloud.google.com/blog/products/iot-devices/cloud-iot-now-makes-device-activity-logging-generally-available/">visualization tool</a> that allows customers to easily diagnose problems and monitor activity among entire fleets of IoT devices. 
-      </li>
-      <li>
-        At NASA, he built a Bluetooth-based tracking system for NASA assets, prototyping package tracking on Earth with potential space applications. His work earned $200,000 in funding from NASA Director Ellen Ochoa and an award for individuals who support the space program. See <a href="https://blog.estimote.com/post/166963330230/nasas-johnson-space-center-transcends-space-and">blogpost</a>
-      </li>
-      <li>While continuing to work for NASA during the school year, David designed and built augmented reality tools that visualize 3D terrain models from Earth and Mars. Featured on <a href="https://arstechnica.com/science/2020/09/augmented-reality-could-be-the-geology-classrooms-killer-app/">ArsTechnica</a> </li>
-    </ul>
-    
-    <hr />
-    <ul class="links-list">
-      <li>
-        <a href="david_lietjauw_resume.pdf" target="_blank"><b> 👉 Resume</b></a>
-      </li>
-      <li>
-        <a href="mailto:david.lietjauw@gmail.com" class="social-link">
-          📪 <b>Email (david.lietjauw@gmail.com) </b>
-        </a>
-      </li>
-      <li>
-        <a href="https://www.linkedin.com/in/davidfromkansas/" class="social-link"> 💁🏻 <b>LinkedIn (/davidfromkansas)</b></a>
-      </li>
-      <li><b>📍 Based in Brooklyn, NYC (open to relocation)</b>
-      </li>
-    </ul>
-
-      </section>
-      <section id="press-view" hidden aria-label="Press">      <ul>
-        <li class="press"><a href="https://channelx.world/2024/06/new-ebay-explore-ai-shopping-discovery-experience/" class="inline-link" target="_blank"> &#128279; Channel X: eBay's new Explore AI shopping discovery experience</a></li>
-        <li class="press"><a href="https://www.valueaddedresource.net/ebay-explore-tests-downvoting-to-let-buyers-rate-ai-powered-recommendations/" class="inline-link" target="_blank"> &#128279; eBay Explore Let Buyers Rate AI-Powered Recommendations</a></li>
-        <li class="press"><a href="https://techcrunch.com/2021/07/28/twitter-launches-u-s-e-commerce-pilot-that-lets-users-shop-from-profiles/" class="inline-link" target="_blank">&#128279; TechCrunch: Twitter lets users shop from profiles</a></li>
-        <li class="press"><a href="https://blog.x.com/en_us/topics/product/2022/twitter-shops-more-space-to-shop" class="inline-link" target="_blank">&#128279; Twitter Blog: Launching Twitter Shops</a></li>
-        <li class="press"><a href="https://blog.x.com/en_us/topics/product/2021/watch--chat--shop--live-shopping-on-twitter" class="inline-link" target="_blank">&#128279; Twitter Blog: Launching Live Shopping</a></li>
-        <li class="press"><a href="https://blog.x.com/en_us/topics/product/2022/be-part-of-the-hype--introducing-product-drops" class="inline-link" target="_blank">&#128279; Twitter Blog: Launching Product Drops</a></li>
-        <li class="press"><a href="https://www.platformer.news/how-instagram-and-twitter-buried/#:~:text=Every%20once%20in,in%20kitchen" class="inline-link" target="_blank">&#128279; Casey Newton: How Instagram and Twitter buried the hatchet</a></li>
-        <li class="press"><a href="https://www.theverge.com/2021/6/23/22546672/twitter-instagram-stories-share-tweets-ios" class="inline-link" target="_blank">&#128279; Verge: Twitter now lets you easily share tweets as Instagram Stories</a></li>
-        <li class="press"><a href="https://www.theverge.com/2021/8/2/22606150/twitter-third-party-apple-google-login-signup-feature" class="inline-link" target="_blank">&#128279; Verge: Twitter adds third-party signup with Apple or Google</a></li>
-        <li class="press"><a href="https://www.theverge.com/2020/12/10/22166657/twitter-share-tweets-snapchat-snap-ios-feature-launch" class="inline-link" target="_blank">&#128279; Verge: You can now add tweets to your snaps</a></li>
-        <li class="press"><a href="https://9to5google.com/2019/06/26/release-notes-web-app-chrome-os/" class="inline-link" target="_blank">&#128279; 9to5Google: ChromeOS tells you what's new with each update</a></li>
-        <li class="press"><a href="https://web.archive.org/web/20190318111731/https://cloud.google.com/blog/products/iot-devices/cloud-iot-now-makes-device-activity-logging-generally-available/" class="inline-link" target="_blank">&#128279; Google Blog: Cloud IoT launches Device Activity Logging</a></li>
-        <li class="press"><a href="https://blog.estimote.com/post/166963330230/nasas-johnson-space-center-transcends-space-and" class="inline-link" target="_blank">&#128279; Estimote: NASA debuts bluetooth tracking system</a></li>
-        <li class="press"><a href="https://arstechnica.com/science/2020/09/augmented-reality-could-be-the-geology-classrooms-killer-app/" class="inline-link" target="_blank">&#128279; ArsTechnica: Augmented reality could be the classroom’s killer app</a></li>
-
-
-      </ul>
-
-      </section>
-      <section id="writing-view" hidden aria-labelledby="writing-heading">
-        <h1 id="writing-heading" class="sr-only">Writing</h1>
-        <div class="writing-toolbar">
-          <span class="writing-all">All writing</span>
-          <label class="writing-search">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
-            <span class="sr-only">Search writing</span>
-            <input id="writing-search" type="search" placeholder="Search" autocomplete="off">
-          </label>
+  <main id="content" class="content" tabindex="-1">
+    <!-- Home -->
+    <section class="detail" data-detail="home" aria-labelledby="home-heading">
+      <div class="about">
+        <img class="portrait" src="better.jpg" alt="Portrait of David Lie-Tjauw" loading="lazy">
+        <div class="about-text">
+          <h2 id="home-heading" class="detail-title" tabindex="-1">About me</h2>
+          <p>As a Product Manager, David brings expertise in AI-driven personalization for shopping from eBay and experience in social commerce and growth from working on consumer product at Twitter.</p>
+          <p>He has a successful track record of getting 0-to-1 products off the ground by listening to customer needs and forming data-driven hypotheses that unlock Product Market Fit.</p>
+          <p>Most of all, David enjoys rallying xfn teams of passionate engineers, designers, and researchers around our customers, which have included everyday people, businesses, and advertisers.</p>
+          <p>David has a B.S. in Computer Science from Washington University in Saint Louis, where he was classically trained as a software engineer.</p>
+          <ul class="contact">
+            <li><a class="pill" href="david_lietjauw_resume.pdf" target="_blank" rel="noopener">Resume</a></li>
+            <li><a class="pill" href="mailto:david.lietjauw@gmail.com">Email</a></li>
+            <li><a class="pill" href="https://www.linkedin.com/in/davidfromkansas/" target="_blank" rel="noopener">LinkedIn</a></li>
+            <li><a class="pill" href="https://davidfromkansas.substack.com/" target="_blank" rel="noopener">Substack</a></li>
+          </ul>
+          <p class="meta">Based in Brooklyn, NYC (open to relocation) · david.lietjauw@gmail.com</p>
         </div>
-        <p id="writing-status" role="status">Loading writing…</p>
-        <ul id="writing-list" class="writing-list" aria-label="Articles"></ul>
-        <button id="writing-more" class="writing-more" type="button" hidden>View more ↓</button>
-        <footer class="writing-footer"><a href="https://davidfromkansas.substack.com/" target="_blank" rel="noopener">Read on Substack ↗</a><span>Reading times are estimates.</span></footer>
-        <noscript><p>Enable JavaScript to browse this list, or read all posts on Substack.</p></noscript>
-      </section>
-    </main>
-  </div>
-  </div>
-  <div class="tv-crt" aria-hidden="true"></div>
-  <img class="tv-frame" src="tv/tv-1400.webp" srcset="tv/tv-800.webp 800w, tv/tv-1400.webp 1400w, tv/tv-2000.webp 2000w" sizes="100vw" alt="" aria-hidden="true">
-  <div class="tv-hint" aria-hidden="true">▼ SCROLL TO WATCH</div>
-  </div>
-  </div>
-  <script src="writing.js" defer></script>
-  <script src="tv.js" defer></script>
-  <script src="intro.js" defer></script>
+      </div>
+    </section>
+
+    <!-- Work: one card per project. Links point to launch coverage until case studies exist. -->
+    <section class="detail" data-detail="work" aria-labelledby="work-heading" hidden>
+      <h2 id="work-heading" class="detail-title" tabindex="-1">Selected work</h2>
+      <div class="cards">
+        <article class="card">
+          <p class="card-kicker">eBay · Senior Product Manager</p>
+          <h3>eBay Explore</h3>
+          <p>An endless, algorithmic feed of item recommendations, personalized to who you are and what you like.</p>
+          <p class="card-links"><a href="https://www.ebay.com/explore" target="_blank" rel="noopener">Try it</a><a href="https://www.linkedin.com/feed/update/urn:li:activity:7203174007599198208/" target="_blank" rel="noopener">Launch post</a></p>
+        </article>
+        <article class="card">
+          <p class="card-kicker">Twitter · First PM, Shopping</p>
+          <h3>Twitter Shopping</h3>
+          <p>Launched Twitter Shops, Live Shopping, Shoppable Profiles and Product Drops, and grew the merchant base from 0 to 10,000 in under a year.</p>
+          <p class="card-links"><a href="https://blog.x.com/en_us/topics/product/2022/twitter-shops-more-space-to-shop" target="_blank" rel="noopener">Shops</a><a href="https://blog.x.com/en_us/topics/product/2021/watch--chat--shop--live-shopping-on-twitter" target="_blank" rel="noopener">Live Shopping</a><a href="https://techcrunch.com/2021/07/28/twitter-launches-u-s-e-commerce-pilot-that-lets-users-shop-from-profiles/" target="_blank" rel="noopener">Profiles</a><a href="https://blog.x.com/en_us/topics/product/2022/be-part-of-the-hype--introducing-product-drops" target="_blank" rel="noopener">Drops</a></p>
+        </article>
+        <article class="card">
+          <p class="card-kicker">Twitter · PM, Growth Acquisition</p>
+          <h3>Logins, signups and sharing</h3>
+          <p>Drove a +20 million increase in DAUs through easier logins and signups, and by bringing Tweets to Instagram Stories and Snapchat.</p>
+          <p class="card-links"><a href="https://www.theverge.com/2021/8/2/22606150/twitter-third-party-apple-google-login-signup-feature" target="_blank" rel="noopener">Signups</a><a href="https://www.theverge.com/2021/6/23/22546672/twitter-instagram-stories-share-tweets-ios" target="_blank" rel="noopener">Instagram</a><a href="https://www.theverge.com/2020/12/10/22166657/twitter-share-tweets-snapchat-snap-ios-feature-launch" target="_blank" rel="noopener">Snapchat</a></p>
+        </article>
+        <article class="card">
+          <p class="card-kicker">Google · Associate Product Manager</p>
+          <h3>ChromeOS “What's New”</h3>
+          <p>A new experience that showcases major ChromeOS updates on all Chromebooks and in the Chrome browser.</p>
+          <p class="card-links"><a href="https://9to5google.com/2019/06/26/release-notes-web-app-chrome-os/" target="_blank" rel="noopener">Coverage</a></p>
+        </article>
+        <article class="card">
+          <p class="card-kicker">Google · Software Engineer</p>
+          <h3>Cloud IoT activity logging</h3>
+          <p>A visualization tool that lets customers diagnose problems and monitor activity across entire fleets of IoT devices.</p>
+          <p class="card-links"><a href="https://web.archive.org/web/20190318111731/https://cloud.google.com/blog/products/iot-devices/cloud-iot-now-makes-device-activity-logging-generally-available/" target="_blank" rel="noopener">Launch post</a></p>
+        </article>
+        <article class="card">
+          <p class="card-kicker">NASA · Engineer</p>
+          <h3>Bluetooth asset tracking</h3>
+          <p>A Bluetooth-based tracking system for NASA assets, prototyping package tracking on Earth with potential space applications. Earned $200,000 in funding from NASA Director Ellen Ochoa.</p>
+          <p class="card-links"><a href="https://blog.estimote.com/post/166963330230/nasas-johnson-space-center-transcends-space-and" target="_blank" rel="noopener">Blog post</a></p>
+        </article>
+        <article class="card">
+          <p class="card-kicker">NASA · Engineer</p>
+          <h3>AR terrain for Earth and Mars</h3>
+          <p>Augmented reality tools that visualize 3D terrain models from Earth and Mars, built while working for NASA during the school year.</p>
+          <p class="card-links"><a href="https://arstechnica.com/science/2020/09/augmented-reality-could-be-the-geology-classrooms-killer-app/" target="_blank" rel="noopener">Ars Technica</a></p>
+        </article>
+      </div>
+      <p class="more"><a class="pill" href="david_lietjauw_resume.pdf" target="_blank" rel="noopener">Full resume</a></p>
+    </section>
+
+    <!-- Writing: filled from data/writing.json (see WRITING.md). -->
+    <section class="detail" data-detail="writing" aria-labelledby="writing-heading" hidden>
+      <h2 id="writing-heading" class="detail-title" tabindex="-1">Writing</h2>
+      <p id="writing-status" class="meta" role="status">Loading writing…</p>
+      <ol id="writing-list" class="essays"></ol>
+      <p class="more"><a class="pill" href="https://davidfromkansas.substack.com/" target="_blank" rel="noopener">Read everything on Substack</a></p>
+      <noscript><p class="meta">Enable JavaScript to see the list, or read all posts on Substack.</p></noscript>
+    </section>
+
+    <!-- Press: add interviews, podcasts and talks by copying a card. -->
+    <section class="detail" data-detail="press" aria-labelledby="press-heading" hidden>
+      <h2 id="press-heading" class="detail-title" tabindex="-1">Press &amp; appearances</h2>
+      <div class="cards press">
+        <a class="card appear" href="https://channelx.world/2024/06/new-ebay-explore-ai-shopping-discovery-experience/" target="_blank" rel="noopener"><span class="card-kicker">Channel X · Article · Jun 2024</span><h3>eBay's new Explore AI shopping discovery experience</h3></a>
+        <a class="card appear" href="https://www.valueaddedresource.net/ebay-explore-tests-downvoting-to-let-buyers-rate-ai-powered-recommendations/" target="_blank" rel="noopener"><span class="card-kicker">Value Added Resource · Article</span><h3>eBay Explore lets buyers rate AI-powered recommendations</h3></a>
+        <a class="card appear" href="https://techcrunch.com/2021/07/28/twitter-launches-u-s-e-commerce-pilot-that-lets-users-shop-from-profiles/" target="_blank" rel="noopener"><span class="card-kicker">TechCrunch · Article · Jul 2021</span><h3>Twitter lets users shop from profiles</h3></a>
+        <a class="card appear" href="https://blog.x.com/en_us/topics/product/2022/twitter-shops-more-space-to-shop" target="_blank" rel="noopener"><span class="card-kicker">Twitter Blog · Launch post · 2022</span><h3>Launching Twitter Shops</h3></a>
+        <a class="card appear" href="https://blog.x.com/en_us/topics/product/2021/watch--chat--shop--live-shopping-on-twitter" target="_blank" rel="noopener"><span class="card-kicker">Twitter Blog · Launch post · 2021</span><h3>Launching Live Shopping</h3></a>
+        <a class="card appear" href="https://blog.x.com/en_us/topics/product/2022/be-part-of-the-hype--introducing-product-drops" target="_blank" rel="noopener"><span class="card-kicker">Twitter Blog · Launch post · 2022</span><h3>Launching Product Drops</h3></a>
+        <a class="card appear" href="https://www.platformer.news/how-instagram-and-twitter-buried/#:~:text=Every%20once%20in,in%20kitchen" target="_blank" rel="noopener"><span class="card-kicker">Platformer · Newsletter</span><h3>Casey Newton: How Instagram and Twitter buried the hatchet</h3></a>
+        <a class="card appear" href="https://www.theverge.com/2021/6/23/22546672/twitter-instagram-stories-share-tweets-ios" target="_blank" rel="noopener"><span class="card-kicker">The Verge · Article · Jun 2021</span><h3>Twitter now lets you easily share tweets as Instagram Stories</h3></a>
+        <a class="card appear" href="https://www.theverge.com/2021/8/2/22606150/twitter-third-party-apple-google-login-signup-feature" target="_blank" rel="noopener"><span class="card-kicker">The Verge · Article · Aug 2021</span><h3>Twitter adds third-party signup with Apple or Google</h3></a>
+        <a class="card appear" href="https://www.theverge.com/2020/12/10/22166657/twitter-share-tweets-snapchat-snap-ios-feature-launch" target="_blank" rel="noopener"><span class="card-kicker">The Verge · Article · Dec 2020</span><h3>You can now add tweets to your snaps</h3></a>
+        <a class="card appear" href="https://9to5google.com/2019/06/26/release-notes-web-app-chrome-os/" target="_blank" rel="noopener"><span class="card-kicker">9to5Google · Article · Jun 2019</span><h3>ChromeOS tells you what's new with each update</h3></a>
+        <a class="card appear" href="https://web.archive.org/web/20190318111731/https://cloud.google.com/blog/products/iot-devices/cloud-iot-now-makes-device-activity-logging-generally-available/" target="_blank" rel="noopener"><span class="card-kicker">Google Cloud Blog · Launch post</span><h3>Cloud IoT launches Device Activity Logging</h3></a>
+        <a class="card appear" href="https://blog.estimote.com/post/166963330230/nasas-johnson-space-center-transcends-space-and" target="_blank" rel="noopener"><span class="card-kicker">Estimote · Blog post</span><h3>NASA debuts Bluetooth tracking system</h3></a>
+        <a class="card appear" href="https://arstechnica.com/science/2020/09/augmented-reality-could-be-the-geology-classrooms-killer-app/" target="_blank" rel="noopener"><span class="card-kicker">Ars Technica · Article · Sep 2020</span><h3>Augmented reality could be the classroom's killer app</h3></a>
+        <!-- Placeholders: replace with real interviews, podcasts and talks. -->
+        <div class="card appear placeholder"><span class="card-kicker">Podcast · Show name · Date</span><h3>Add a podcast appearance</h3></div>
+        <div class="card appear placeholder"><span class="card-kicker">Talk · Event name · Date</span><h3>Add a talk or panel</h3></div>
+      </div>
+    </section>
+
+    <!-- Fun: side projects hosted on this site or linked from it. -->
+    <section class="detail" data-detail="fun" aria-labelledby="fun-heading" hidden>
+      <h2 id="fun-heading" class="detail-title" tabindex="-1">Things I made for fun</h2>
+      <div class="cards toys">
+        <a class="card toy" href="screenplayground/" style="--hue: 330"><span class="toy-emoji" aria-hidden="true">🎬</span><h3>Screen Playground</h3><p>A free screen recorder for Mac with automatic zooms, a smooth cursor and beautiful backgrounds.</p></a>
+        <a class="card toy" href="viz/" style="--hue: 200"><span class="toy-emoji" aria-hidden="true">🛰️</span><h3>Agent Trace</h3><p>Watch what Claude Code and Codex are doing and thinking, live, in your browser.</p></a>
+        <a class="card toy" href="moon/" style="--hue: 260"><span class="toy-emoji" aria-hidden="true">🌙</span><h3>Tonight's Moon</h3><p class="placeholder-text">Add a one-line description.</p></a>
+        <a class="card toy" href="diorama/" style="--hue: 40"><span class="toy-emoji" aria-hidden="true">🏠</span><h3>Diorama</h3><p class="placeholder-text">Add a one-line description.</p></a>
+        <a class="card toy" href="playback/" style="--hue: 150"><span class="toy-emoji" aria-hidden="true">📼</span><h3>Playback</h3><p class="placeholder-text">Add a one-line description.</p></a>
+        <a class="card toy" href="sim/" style="--hue: 15"><span class="toy-emoji" aria-hidden="true">📺</span><h3>Claudeville TV</h3><p class="placeholder-text">Add a one-line description.</p></a>
+      </div>
+      <h3 class="sub">Interests</h3>
+      <!-- Placeholders: replace with real interests. -->
+      <ul class="chips">
+        <li class="placeholder">Add an interest</li>
+        <li class="placeholder">Add an interest</li>
+        <li class="placeholder">Add an interest</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>© David Lie-Tjauw</span>
+    <button type="button" class="to-top">Back to top ↑</button>
+  </footer>
+
+  <script src="home.js" defer></script>
 </body>
 </html>
