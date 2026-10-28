@@ -126,6 +126,17 @@
   new ResizeObserver(layout).observe(hero);
   layout();
 
+  // ---- Profile card clock: the visitor's local time and date, updated on the minute ----
+  const clock = document.getElementById('gc-clock');
+  const clockFormat = new Intl.DateTimeFormat(undefined, { month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  function tick() {
+    const now = new Date();
+    clock.dateTime = now.toISOString();
+    clock.textContent = clockFormat.format(now).replace(',', '');
+    setTimeout(tick, 60000 - (now.getSeconds() * 1000 + now.getMilliseconds()) + 50);
+  }
+  tick();
+
   // ---- Writing list, from data/writing.json (see WRITING.md) ----
   let writingLoaded = false;
   const dateFormat = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
