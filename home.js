@@ -1,8 +1,8 @@
 // Home screen: five tiles select a section. Each section has a shareable #hash, works with
 // back/forward, and swaps the background scene, hero copy and detailed content together.
 (() => {
-  const SECTIONS = ['home', 'work', 'writing', 'press', 'fun'];
-  const TITLES = { home: 'David Lie-Tjauw', work: 'Work', writing: 'Writing', press: 'Press', fun: 'Fun' };
+  const SECTIONS = ['home', 'work', 'writing', 'press', 'fun', 'favorites'];
+  const TITLES = { home: 'David Lie-Tjauw', work: 'Work', writing: 'Writing', press: 'Press', fun: 'Fun', favorites: 'Favorites' };
   const root = document.documentElement;
   const tiles = [...document.querySelectorAll('.tile')];
   const scenes = [...document.querySelectorAll('.scene')];
@@ -24,6 +24,16 @@
     for (const t of tiles) {
       const on = t.dataset.section === name;
       if (on) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
+    }
+    // Keep the selected tile in view when the row scrolls (phones), without moving the page.
+    const sel = tiles.find((t) => t.dataset.section === name);
+    const rowEl = sel?.closest('.tiles');
+    if (rowEl && rowEl.scrollWidth > rowEl.clientWidth) {
+      const l = sel.getBoundingClientRect().left - rowEl.getBoundingClientRect().left + rowEl.scrollLeft;
+      const r = l + sel.offsetWidth;
+      if (l < rowEl.scrollLeft || r > rowEl.scrollLeft + rowEl.clientWidth) {
+        rowEl.scrollTo({ left: Math.max(0, r - rowEl.clientWidth + 24), behavior: 'instant' });
+      }
     }
     for (const s of scenes) s.classList.toggle('is-active', s.dataset.scene === name);
     for (const p of panels) {
@@ -222,6 +232,24 @@
   const whenIdle = (fn) => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 2000 }) : setTimeout(fn, 300));
   if (document.readyState === 'complete') whenIdle(startLive);
   else addEventListener('load', () => whenIdle(startLive), { once: true });
+
+  // ---- Favorites: product models turn slowly on their cards (art/beach/spin.js, built
+  // from beach/). Loaded when a card first comes near the screen; the still stays if not ----
+  const models = document.querySelectorAll('[data-model]');
+  if (models.length && 'IntersectionObserver' in window) {
+    let spinner = null;
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        io.unobserve(e.target);
+        spinner ??= import('./art/beach/spin.js');
+        spinner.then((m) => m.supported() && m.spin(e.target, e.target.dataset.model, { reduced: !motion.matches }))
+          .then((v) => v && e.target.classList.add('is-live'))
+          .catch(() => {});
+      }
+    }, { rootMargin: '200px' });
+    models.forEach((el) => io.observe(el));
+  }
 
   // ---- Profile card clock: the visitor's local date and time, updated on the minute ----
   const clock = document.getElementById('gc-clock');

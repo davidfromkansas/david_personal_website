@@ -410,7 +410,94 @@ def fun():
     shoot("fun", hero, tile)
 
 
-SCENES = {"work": work, "writing": writing, "press": press, "fun": fun}
+def favorites():
+    """A product shelf: a heart on a round plinth, wrapped boxes and a star, under soft studio light."""
+    reset()
+    sky([(0.0, (0.75, 0.95, 0.9)), (1.0, (0.85, 0.9, 1.0))], strength=0.3)
+    cube((30, 30, 0.1), (0, 0, -0.05), mat("floor", (0.04, 0.32, 0.32), rough=0.6))
+    cube((30, 0.1, 12), (0, 3.2, 6), mat("wall", (0.05, 0.36, 0.36), rough=0.85))
+
+    def glossy(name, col, rough=0.15):
+        return mat(name, col, rough=rough, coat=1.0)
+    white, red, gold = glossy("white", (0.92, 0.92, 0.9), 0.3), glossy("red", (0.95, 0.08, 0.18)), mat("gold", (1.0, 0.72, 0.25), rough=0.2, metallic=1.0)
+    cream, navy, coral = glossy("cream", (1.0, 0.85, 0.6), 0.35), glossy("navy", (0.05, 0.1, 0.35), 0.3), glossy("coral", (1.0, 0.4, 0.3), 0.3)
+    # Plinths.
+    cyl(0.7, 0.7, (2.0, 1.0, 0.35), white, bevel=0.03)
+    cyl(0.45, 0.35, (3.35, 1.2, 0.175), white, bevel=0.02)
+    # A puffy heart: the classic heart curve as a slab, remeshed and smoothed into a pillow.
+    import bmesh
+    me = bpy.data.meshes.new("heart")
+    bm = bmesh.new()
+    ring = []
+    for i in range(120):
+        t = 2 * math.pi * i / 120
+        x = 16 * math.sin(t) ** 3
+        y = 13 * math.cos(t) - 5 * math.cos(2 * t) - 2 * math.cos(3 * t) - math.cos(4 * t)
+        ring.append(bm.verts.new((x * 0.026, 0, y * 0.026)))
+    face = bm.faces.new(ring)
+    ext = bmesh.ops.extrude_face_region(bm, geom=[face])
+    bmesh.ops.translate(bm, vec=(0, 0.2, 0), verts=[v for v in ext["geom"] if isinstance(v, bmesh.types.BMVert)])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(me)
+    heart = bpy.data.objects.new("heart", me)
+    bpy.context.scene.collection.objects.link(heart)
+    rm = heart.modifiers.new("remesh", "REMESH")
+    rm.mode = "VOXEL"
+    rm.voxel_size = 0.012
+    sm = heart.modifiers.new("smooth", "SMOOTH")
+    sm.factor = 1.0
+    sm.iterations = 40
+    heart.location = (2.0, 0.9, 1.38)
+    heart.scale = (1.3, 1.3, 1.3)
+    heart.rotation_euler = (0, math.radians(-10), math.radians(-14))
+    put(heart, red)
+    # Wrapped boxes with ribbons.
+    for size, loc, rot, body, ribbon in (
+            ((0.55, 0.55, 0.45), (0.75, 0.9, 0.225), 12, cream, red),
+            ((0.38, 0.38, 0.32), (1.05, 0.25, 0.16), -20, navy, gold),
+            ((0.3, 0.3, 0.3), (3.35, 1.2, 0.5), 30, coral, white)):
+        r = (0, 0, math.radians(rot))
+        cube(size, loc, body, rot=r, bevel=0.015)
+        cube((size[0] + 0.01, 0.06, size[2] + 0.01), loc, ribbon, rot=r)
+        cube((0.06, size[1] + 0.01, size[2] + 0.01), loc, ribbon, rot=r)
+        torus(0.07, 0.022, (loc[0], loc[1], loc[2] + size[2] / 2 + 0.05), ribbon, rot=(math.radians(90), 0, r[2]))
+    # A star.
+    bm_star = bpy.data.meshes.new("star")
+    import bmesh
+    bm = bmesh.new()
+    pts = []
+    for i in range(10):
+        a = math.pi / 2 + i * math.pi / 5
+        rr = 0.32 if i % 2 == 0 else 0.14
+        pts.append((rr * math.cos(a), 0, rr * math.sin(a)))
+    front = [bm.verts.new((x, -0.06, z)) for x, _, z in pts]
+    back = [bm.verts.new((x, 0.06, z)) for x, _, z in pts]
+    bm.faces.new(front)
+    bm.faces.new(list(reversed(back)))
+    for i in range(10):
+        j = (i + 1) % 10
+        bm.faces.new((front[i], front[j], back[j], back[i]))
+    bm.to_mesh(bm_star)
+    star = bpy.data.objects.new("star", bm_star)
+    bpy.context.scene.collection.objects.link(star)
+    star.location = (3.0, 0.4, 1.35)
+    star.rotation_euler = (0, math.radians(-14), math.radians(-18))
+    star.modifiers.new("b", "BEVEL").width = 0.025
+    put(star, gold, smooth=False)
+    # Sparkles.
+    rnd = random.Random(5)
+    spark = emit("spark", (1.0, 0.85, 0.55), 4)
+    for k in range(14):
+        sphere(rnd.uniform(0.008, 0.018), (rnd.uniform(0.6, 3.6), rnd.uniform(0.2, 1.6), rnd.uniform(1.0, 2.3)), spark)
+    area((-2, -3, 4), (2, 1, 1), 4, 330, (1.0, 0.95, 0.9))
+    area((5, -1, 2.5), (2, 1, 1), 3, 230, (0.8, 0.9, 1.0))
+    area((2, 2.5, 4.5), (2, 1, 0.8), 3, 140, (1.0, 0.8, 0.85))
+    hero = camera((-0.6, -4.6, 1.55), (1.45, 0.9, 1.15), 32)
+    tile = camera((2.0, -2.2, 1.35), (2.0, 1.0, 1.15), 50, name="tile")
+    shoot("favorites", hero, tile)
+
+
+SCENES = {"work": work, "writing": writing, "press": press, "fun": fun, "favorites": favorites}
 os.makedirs(OUTDIR, exist_ok=True)
 for name, fn in SCENES.items():
     if WHICH in ("all", name):

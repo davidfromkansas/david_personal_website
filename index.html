@@ -44,6 +44,9 @@
       <div class="scene" data-scene="fun">
         <div class="scene-drift"><img class="scene-img" src="art/fun.webp" srcset="art/fun-1200.webp 1200w, art/fun.webp 2400w" sizes="100vw" alt="" loading="lazy"></div>
       </div>
+      <div class="scene" data-scene="favorites">
+        <div class="scene-drift"><img class="scene-img" src="art/favorites.webp" srcset="art/favorites-1200.webp 1200w, art/favorites.webp 2400w" sizes="100vw" alt="" loading="lazy"></div>
+      </div>
       <div class="scene-shade"></div>
     </div>
 
@@ -77,6 +80,9 @@
           <li><a class="tile" href="#fun" data-section="fun" tabindex="-1">
             <span class="tile-art"><img src="art/tile-fun.webp" alt="" width="160" height="160"></span>
             <span class="tile-label">Fun</span></a></li>
+          <li><a class="tile" href="#favorites" data-section="favorites" tabindex="-1">
+            <span class="tile-art"><img src="art/tile-favorites.webp" alt="" width="160" height="160"></span>
+            <span class="tile-label">Favorites</span></a></li>
         </ul>
         <span class="tiles-more" aria-hidden="true">›</span>
       </nav>
@@ -107,6 +113,11 @@
           <h2 id="panel-fun" class="panel-title">Fun</h2>
           <p class="panel-desc">Side projects, experiments and little tools I build for the joy of it.</p>
           <button class="action" type="button" data-go="fun">Explore for fun</button>
+        </section>
+        <section class="panel" data-panel="favorites" aria-labelledby="panel-favorites" inert>
+          <h2 id="panel-favorites" class="panel-title">Favorites</h2>
+          <p class="panel-desc">Products I use all the time and would happily buy again.</p>
+          <button class="action" type="button" data-go="favorites">See my favorites</button>
         </section>
       </div>
     </div>
@@ -235,6 +246,22 @@
         <li class="placeholder">Add an interest</li>
         <li class="placeholder">Add an interest</li>
       </ul>
+    </section>
+
+    <section class="detail" data-detail="favorites" aria-labelledby="favorites-heading" hidden>
+      <h2 id="favorites-heading" class="detail-title" tabindex="-1">Favorite products</h2>
+      <div class="cards products">
+        <article class="card product">
+          <div class="model" data-model="art/favorites/heroclip.glb">
+            <img class="model-poster" src="art/favorites/heroclip.webp" alt="A black Gear Aid HeroClip: a D-shaped clip with a hook folded across its face" width="600" height="600" loading="lazy">
+          </div>
+          <span class="card-kicker">Everyday carry</span>
+          <h3>Gear Aid HeroClip (Medium)</h3>
+          <p class="placeholder-text">Add why you love it.</p>
+          <p class="card-links"><a href="https://www.gearaid.com/products/heroclip-medium" target="_blank" rel="noopener">See it at Gear Aid ↗</a></p>
+        </article>
+        <div class="card placeholder product-empty"><h3>Add a product</h3><p>Name, a photo or model, and why you love it.</p></div>
+      </div>
     </section>
   </main>
 
