@@ -1,0 +1,9 @@
+{
+  "title": "Terrain Lab",
+  "description": "Sculpt a wireframe landscape with procedural noise. Explore the relationship between elevation, frequency, and form.",
+  "tags": ["Simulation", "Generative"],
+  "createdAt": "2026-11-19",
+  "updatedAt": "2026-11-19T14:00:00Z",
+  "hidden": false,
+  "public": false
+}

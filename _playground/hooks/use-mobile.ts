@@ -1,0 +1,12 @@
+import { useEffect, useState } from "react";
+export function useIsMobile() {
+  const [mobile, setMobile] = useState(false);
+  useEffect(() => {
+    const query = matchMedia("(max-width: 767px)");
+    const update = () => setMobile(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+  return mobile;
+}
