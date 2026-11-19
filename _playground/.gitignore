@@ -1,0 +1,14 @@
+node_modules/
+.next/
+.env*
+!.env.example
+*.tsbuildinfo
+.vercel/
+.open-next/
+dist/
+.npmrc
+.openai/
+
+lib/*.generated.ts
+lib/*.generated.json
+.capture-*/
